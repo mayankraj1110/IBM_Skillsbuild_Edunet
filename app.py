@@ -19,11 +19,11 @@ theme = gr.themes.Soft(
     button_secondary_text_color="#172033",
 )
 
-# Custom CSS for micro-animations, presets, day cards, and typography
+# Custom CSS overrides for SaaS layout, presets, timeline, and input boxes
 css = """
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap');
 
-/* Global font reset for all nested Gradio components to ensure Outfit is loaded correctly */
+/* Global Reset to Outfit font */
 .gradio-container, 
 .gradio-container input, 
 .gradio-container select, 
@@ -37,12 +37,12 @@ css = """
     font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif !important;
 }
 
-/* Banner styling */
+/* Hero banner */
 .hero-banner {
     background: rgba(248, 251, 255, 0.85);
     border: 1px solid rgba(255, 255, 255, 0.5);
     border-radius: 30px;
-    padding: 38px;
+    padding: 35px;
     margin-bottom: 24px;
     backdrop-filter: blur(14px);
     box-shadow: 0 25px 60px rgba(17, 44, 80, 0.08);
@@ -80,7 +80,7 @@ css = """
     max-width: 800px;
 }
 
-/* Force rounded corners and soft backgrounds on all Gradio blocks, cards, and panels */
+/* Force rounded corners and clean borders on all Gradio blocks */
 .gradio-container .block {
     border-radius: 22px !important;
     border: 1px solid rgba(23, 32, 51, 0.12) !important;
@@ -88,7 +88,7 @@ css = """
     background: rgba(255, 255, 255, 0.72) !important;
 }
 
-/* Force high-readability styles on input fields in both light and dark mode */
+/* Style inputs with high-contrast text color */
 .gradio-container input, 
 .gradio-container select, 
 .gradio-container textarea,
@@ -103,7 +103,7 @@ css = """
     padding: 10px 14px !important;
 }
 
-/* Styling dropdown menu lists */
+/* Dropdown list container styles */
 .gradio-container .options,
 .gradio-container .option,
 .gradio-container .dropdown-menu,
@@ -120,13 +120,13 @@ css = """
     color: #1272d9 !important;
 }
 
-/* High-readability placeholders */
+/* Placeholder styling */
 .gradio-container input::placeholder, 
 .gradio-container textarea::placeholder {
     color: #8b9bb4 !important;
 }
 
-/* Focus styles */
+/* Focus outline */
 .gradio-container input:focus, 
 .gradio-container select:focus, 
 .gradio-container textarea:focus {
@@ -187,35 +187,6 @@ css = """
     transform: translateY(0px) !important;
 }
 
-/* Day Itinerary Cards */
-.day-card {
-    background: linear-gradient(135deg, rgba(18, 114, 217, 0.04), rgba(13, 139, 128, 0.03));
-    border: 1px solid rgba(18, 114, 217, 0.08);
-    border-radius: 16px;
-    padding: 16px;
-    margin-bottom: 12px;
-    transition: all 0.2s ease;
-}
-
-.day-card:hover {
-    border-color: rgba(18, 114, 217, 0.18);
-    transform: translateX(2px);
-}
-
-.day-title {
-    font-size: 0.98rem;
-    font-weight: 700;
-    color: #1272d9;
-    margin-bottom: 4px;
-    display: block;
-}
-
-.day-text {
-    font-size: 0.92rem;
-    color: #3b485e;
-    line-height: 1.6;
-}
-
 /* Glass panel wrappers for output blocks */
 .glass-panel {
     background: rgba(255, 255, 255, 0.72) !important;
@@ -236,66 +207,6 @@ css = """
     margin-bottom: 14px;
     border-bottom: 1px solid rgba(23, 32, 51, 0.08);
     padding-bottom: 8px;
-}
-
-/* Metric configurations */
-.metric-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-top: 12px;
-}
-
-.budget-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin-top: 12px;
-}
-
-.metric-card {
-    background: rgba(255, 255, 255, 0.92);
-    border: 1px solid rgba(23, 32, 51, 0.08);
-    border-radius: 16px;
-    padding: 12px;
-    text-align: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.01);
-}
-
-.metric-label {
-    font-size: 0.78rem;
-    color: #61708a;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    display: block;
-    margin-bottom: 4px;
-}
-
-.metric-val {
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: #172033;
-}
-
-/* Badge styling */
-.badge {
-    background: rgba(13, 139, 128, 0.12);
-    color: #0d8b80;
-    font-weight: 700;
-    font-size: 0.82rem;
-    padding: 6px 14px;
-    border-radius: 999px;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-}
-
-.badge-inactive {
-    background: rgba(97, 112, 138, 0.12);
-    color: #61708a;
-    font-weight: 700;
-    font-size: 0.82rem;
-    padding: 6px 14px;
-    border-radius: 999px;
 }
 """
 
@@ -451,7 +362,7 @@ def find_local_dest(query):
 def geocode_dest(query):
     try:
         url = f"https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q={requests.utils.quote(query)}"
-        headers = {"User-Agent": "CampusTrailAI-Gradio/2.0"}
+        headers = {"User-Agent": "CampusTrailAI-Gradio/3.0"}
         res = requests.get(url, headers=headers, timeout=5)
         if res.ok and res.json():
             return res.json()[0]
@@ -547,12 +458,12 @@ def generate_itinerary(dest, days, budget, group, style, focus, notes, start_loc
             resolved_start_name = start_resolved["name"]
 
     # 1. Snapshot HTML
-    badge = f"{resolved['name']} • {style}"
+    badge_val = f"{resolved['name']} • {style}"
     snap_html = f"""
     <div class="glass-panel">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
             <h4 style="margin:0; font-size:1.05rem; font-weight:700;">Trip Snapshot</h4>
-            <span class="badge">{badge}</span>
+            <span class="badge">{badge_val}</span>
         </div>
         <div class="metric-row">
             <div class="metric-card">
@@ -576,11 +487,11 @@ def generate_itinerary(dest, days, budget, group, style, focus, notes, start_loc
     """
 
     # 2. Overview HTML
-    overview_text = f"CampusTrail suggests a {days}-day {focus.lower()} trip to {resolved['name']} for a {group.lower()} group with a budget of Rs {int(budget):,}. The plan aims to keep travel practical, affordable, and student-friendly."
+    overview_text = f"CampusTrail suggests a <strong>{days}-day {focus.lower()} trip</strong> to <strong>{resolved['name']}</strong> for a <strong>{group.lower()}</strong> group with a budget of <strong>Rs {int(budget):,}</strong>. The plan aims to keep travel practical, affordable, and student-friendly."
     overview_html = f"""
     <div class="glass-panel">
         <div class="section-hdr">Trip Overview</div>
-        <p style="margin: 0; color: #3b485e; line-height:1.6;">{overview_text}</p>
+        <p style="margin: 0; color: #3b485e; font-size: 0.98rem; line-height: 1.7; font-weight: 400;">{overview_text}</p>
     </div>
     """
 
@@ -623,7 +534,7 @@ def generate_itinerary(dest, days, budget, group, style, focus, notes, start_loc
         ).add_to(m)
         
         dist = distance_km(start_coords, resolved["center"])
-        distance_status = f" • <b>{int(dist)} km</b> from your starting location ({resolved_start_name})"
+        distance_status = f" • <b>{int(dist)} km</b> from starting location ({resolved_start_name})"
         m.fit_bounds([start_coords, resolved["center"]])
 
     source_label = "built-in place data loaded" if resolved["source"] == "dataset" else "OpenStreetMap lookup loaded"
@@ -631,51 +542,79 @@ def generate_itinerary(dest, days, budget, group, style, focus, notes, start_loc
     
     highlights_html = ""
     if resolved["highlights"]:
-        highlights_html = "<div style='margin-top:12px; font-size:0.9rem;'><b>Local Highlights:</b><ul>"
+        highlights_html = "<div style='margin-top:14px; font-size:0.92rem;'><b>📍 Local Highlights:</b><ul style='margin: 8px 0 0 0; padding-left: 18px; color: #3b485e;'>"
         for h in resolved["highlights"]:
-            highlights_html += f"<li style='margin-bottom:4px;'><b>{h['name']}</b>: {h['blurb']}</li>"
+            highlights_html += f"<li style='margin-bottom: 6px;'><b>{h['name']}</b>: {h['blurb']}</li>"
         highlights_html += "</ul></div>"
     
+    coords_str = f"{resolved['center'][0]:.4f}, {resolved['center'][1]:.4f}"
     map_box_html = f"""
     <div class="glass-panel">
         <div class="section-hdr">Map & Location Insights</div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.88rem; margin-bottom:12px;">
-            <div><b>Coordinates:</b> {resolved['center'][0]:.4f}, {resolved['center'][1]:.4f}<br><b>Best Base:</b> {resolved['base']}</div>
-            <div><b>Transport:</b> {resolved['transport']}<br><b>Best Season:</b> {resolved['season']}</div>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 0.88rem; margin-bottom: 14px; padding: 12px; background: rgba(255,255,255,0.5); border-radius: 12px; border: 1px solid rgba(23,32,51,0.04);">
+            <div>
+                <span style="color:#61708a; display:block; font-size:0.72rem; text-transform:uppercase; font-weight:600; margin-bottom:2px;">Coordinates</span>
+                <strong style="color:#172033; font-size:0.9rem;">{coords_str}</strong>
+            </div>
+            <div>
+                <span style="color:#61708a; display:block; font-size:0.72rem; text-transform:uppercase; font-weight:600; margin-bottom:2px;">Best Base</span>
+                <strong style="color:#172033; font-size:0.9rem;">{resolved['base']}</strong>
+            </div>
+            <div style="margin-top: 8px;">
+                <span style="color:#61708a; display:block; font-size:0.72rem; text-transform:uppercase; font-weight:600; margin-bottom:2px;">Transport</span>
+                <strong style="color:#172033; font-size:0.9rem;">{resolved['transport']}</strong>
+            </div>
+            <div style="margin-top: 8px;">
+                <span style="color:#61708a; display:block; font-size:0.72rem; text-transform:uppercase; font-weight:600; margin-bottom:2px;">Best Season</span>
+                <strong style="color:#172033; font-size:0.9rem;">{resolved['season']}</strong>
+            </div>
         </div>
-        <div style="border-radius:16px; overflow:hidden; border:1px solid rgba(23,32,51,0.1);">{m._repr_html_()}</div>
-        <p style="color: #61708a; font-size: 0.8rem; margin: 8px 0 0 0;">{map_status}</p>
+        <div style="border-radius:18px; overflow:hidden; border: 1px solid rgba(23, 32, 51, 0.15); box-shadow: 0 4px 12px rgba(0,0,0,0.02);">{m._repr_html_()}</div>
+        <p style="color: #61708a; font-size: 0.8rem; margin: 10px 0 0 0; font-weight: 500;">{map_status}</p>
         {highlights_html}
     </div>
     """
 
-    # 4. Budget Split HTML
+    # 4. Budget Split HTML (SaaS matrix style with icons and percentages)
     costs = build_budget_split(budget, style)
+    percentages = {
+        "Budget": {"travel": 32, "stay": 24, "food": 24, "buffer": 20},
+        "Balanced": {"travel": 30, "stay": 28, "food": 24, "buffer": 18},
+        "Comfort": {"travel": 26, "stay": 34, "food": 24, "buffer": 16}
+    }[style]
+    
+    items = [
+        ("Travel", costs["travel"], percentages["travel"], "✈️", "rgba(18, 114, 217, 0.1)", "#1272d9"),
+        ("Stay", costs["stay"], percentages["stay"], "🏨", "rgba(13, 139, 128, 0.1)", "#0d8b80"),
+        ("Food", costs["food"], percentages["food"], "🍔", "rgba(240, 165, 58, 0.1)", "#f0a53a"),
+        ("Buffer", costs["buffer"], percentages["buffer"], "🛡️", "rgba(97, 112, 138, 0.1)", "#61708a")
+    ]
+    
+    cards = ""
+    for name, amount, pct, icon, bg, color in items:
+        cards += f"""
+        <div style="background: #ffffff; border: 1px solid rgba(23,32,51,0.08); border-radius: 16px; padding: 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.01);">
+            <div style="width: 42px; height: 42px; border-radius: 12px; background: {bg}; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">{icon}</div>
+            <div style="flex-grow: 1;">
+                <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                    <span style="font-size: 0.75rem; color: #61708a; text-transform: uppercase; letter-spacing: 0.05em; font-weight:600;">{name}</span>
+                    <span style="font-size: 0.7rem; color: {color}; font-weight: 700; background: {bg}; padding: 2px 6px; border-radius: 6px;">{pct}%</span>
+                </div>
+                <strong style="font-size: 1.1rem; color: #172033; display: block; margin-top: 2px;">Rs {int(amount):,}</strong>
+            </div>
+        </div>
+        """
+        
     budget_html = f"""
     <div class="glass-panel">
-        <div class="section-hdr">Budget Split</div>
-        <div class="budget-row">
-            <div class="metric-card" style="background: rgba(18,114,217,0.04);">
-                <span class="metric-label">Travel</span>
-                <span class="metric-val" style="color: #0d8b80;">Rs {int(costs['travel']):,}</span>
-            </div>
-            <div class="metric-card" style="background: rgba(18,114,217,0.04);">
-                <span class="metric-label">Stay</span>
-                <span class="metric-val" style="color: #0d8b80;">Rs {int(costs['stay']):,}</span>
-            </div>
-            <div class="metric-card" style="background: rgba(18,114,217,0.04);">
-                <span class="metric-label">Food</span>
-                <span class="metric-val" style="color: #0d8b80;">Rs {int(costs['food']):,}</span>
-            </div>
-            <div class="metric-card" style="background: rgba(18,114,217,0.04);">
-                <span class="metric-label">Buffer</span>
-                <span class="metric-val" style="color: #0d8b80;">Rs {int(costs['buffer']):,}</span>
-            </div>
+        <div class="section-hdr">Budget Split ({style} style)</div>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+            {cards}
         </div>
     </div>
     """
 
-    # 5. Day-wise Itinerary HTML
+    # 5. Day-wise Itinerary HTML (Modern vertical timeline)
     days_plan = []
     base_plans = focus_plans.get(focus, focus_plans["Mixed"])
     for i in range(1, days + 1):
@@ -696,26 +635,33 @@ def generate_itinerary(dest, days, budget, group, style, focus, notes, start_loc
             
         base_action = base_plans[(i - 1) % len(base_plans)]
         days_plan.append({
-            "title": f"Day {i}",
+            "day": i,
             "text": f"{intro} {base_action} {style_line}"
         })
 
-    day_cards_html = ""
+    timeline_items = ""
     for d in days_plan:
-        day_cards_html += f"""
-        <div class="day-card">
-            <span class="day-title">{d['title']}</span>
-            <span class="day-text">{d['text']}</span>
+        timeline_items += f"""
+        <div style="position: relative; margin-bottom: 24px; padding-left: 24px;">
+            <!-- Circle Node -->
+            <div style="position: absolute; left: -31px; top: 3px; width: 12px; height: 12px; border-radius: 50%; background: #1272d9; border: 4px solid #ffffff; box-shadow: 0 0 0 3px rgba(18, 114, 217, 0.15);"></div>
+            <div>
+                <strong style="font-size: 1rem; color: #1272d9; display: block; margin-bottom: 4px; font-weight: 700; text-transform: uppercase; letter-spacing:0.03em;">Day {d['day']}</strong>
+                <p style="margin: 0; font-size: 0.94rem; color: #3b485e; line-height: 1.6;">{d['text']}</p>
+            </div>
         </div>
         """
+
     itinerary_html = f"""
     <div class="glass-panel">
-        <div class="section-hdr">Day-wise Itinerary</div>
-        {day_cards_html}
+        <div class="section-hdr">Day-wise Timeline</div>
+        <div style="position: relative; border-left: 2px solid rgba(18, 114, 217, 0.15); margin-left: 31px; margin-top: 14px; padding-bottom: 1px;">
+            {timeline_items}
+        </div>
     </div>
     """
 
-    # 6. Packing & Tips HTML
+    # 6. Packing & Tips HTML (Clean checklist style with checkmarks)
     tips = [
         f"Save offline maps and keep the {resolved['name']} hotel or hostel address pinned.",
         "Carry student ID, one power bank, refillable water bottle, and emergency cash.",
@@ -737,13 +683,21 @@ def generate_itinerary(dest, days, budget, group, style, focus, notes, start_loc
         truncated_notes = notes.strip()[:90] + ("..." if len(notes.strip()) > 90 else "")
         tips.append(f"Planner note used: {truncated_notes}")
 
-    tips_li = "".join([f"<li style='margin-bottom: 6px;'>{t}</li>" for t in tips])
+    tips_items = ""
+    for t in tips:
+        tips_items += f"""
+        <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
+            <div style="color: #0d8b80; font-weight: bold; font-size: 1.1rem; line-height: 1;">✓</div>
+            <span style="font-size: 0.94rem; color: #3b485e; line-height: 1.5;">{t}</span>
+        </div>
+        """
+
     tips_html = f"""
     <div class="glass-panel">
-        <div class="section-hdr">Packing & Safety</div>
-        <ul style="margin: 0; padding-left: 18px; color: #3b485e; font-size:0.92rem; line-height: 1.5;">
-            {tips_li}
-        </ul>
+        <div class="section-hdr">Packing & Safety Tips</div>
+        <div style="margin-top: 10px;">
+            {tips_items}
+        </div>
     </div>
     """
 
