@@ -23,6 +23,20 @@ theme = gr.themes.Soft(
 css = """
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
 
+/* Global font reset for all nested Gradio components to ensure Outfit is loaded correctly */
+.gradio-container, 
+.gradio-container input, 
+.gradio-container select, 
+.gradio-container textarea, 
+.gradio-container button,
+.gradio-container label,
+.gradio-container span,
+.gradio-container p,
+.gradio-container div,
+.gradio-container a {
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
 /* Banner styling */
 .hero-banner {
     background: rgba(248, 251, 255, 0.85);
@@ -66,19 +80,67 @@ css = """
     max-width: 800px;
 }
 
-/* Force rounded corners on all Gradio blocks, cards, and panels */
+/* Force rounded corners and soft backgrounds on all Gradio blocks, cards, and panels */
 .gradio-container .block {
     border-radius: 22px !important;
     border: 1px solid rgba(23, 32, 51, 0.12) !important;
     box-shadow: 0 15px 35px rgba(17, 44, 80, 0.04) !important;
+    background: rgba(255, 255, 255, 0.72) !important;
 }
 
-/* Style input fields */
-.gradio-container input, .gradio-container select, .gradio-container textarea {
+/* Force high-readability styles on input fields in both light and dark mode */
+.gradio-container input, 
+.gradio-container select, 
+.gradio-container textarea,
+.gradio-container .dropdown-select,
+.gradio-container .secondary-wrap,
+.gradio-container .dropdown_wrap {
     border-radius: 12px !important;
-    border: 1px solid rgba(23, 32, 51, 0.12) !important;
+    border: 1px solid rgba(23, 32, 51, 0.18) !important;
     background-color: #ffffff !important;
+    color: #172033 !important;
     font-size: 0.95rem !important;
+    padding: 10px 14px !important;
+}
+
+/* Styling dropdown menu lists */
+.gradio-container .options,
+.gradio-container .option,
+.gradio-container .dropdown-menu,
+.gradio-container ul.options-list,
+.gradio-container li.option {
+    background-color: #ffffff !important;
+    color: #172033 !important;
+}
+
+.gradio-container .option:hover,
+.gradio-container .option.selected,
+.gradio-container li.selected {
+    background-color: rgba(18, 114, 217, 0.08) !important;
+    color: #1272d9 !important;
+}
+
+/* High-readability placeholders */
+.gradio-container input::placeholder, 
+.gradio-container textarea::placeholder {
+    color: #8b9bb4 !important;
+}
+
+/* Focus styles */
+.gradio-container input:focus, 
+.gradio-container select:focus, 
+.gradio-container textarea:focus {
+    border-color: #1272d9 !important;
+    box-shadow: 0 0 0 3px rgba(18, 114, 217, 0.15) !important;
+}
+
+/* Bold dark slate labels for maximum readability */
+.gradio-container label span,
+.gradio-container .block-label {
+    color: #172033 !important;
+    font-weight: 600 !important;
+    font-size: 0.9rem !important;
+    text-transform: none !important;
 }
 
 /* Force round buttons */
