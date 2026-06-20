@@ -170,27 +170,6 @@ st.markdown("""
         line-height: 1.6;
     }
     
-    /* Checklist */
-    .check-item {
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-        margin-bottom: 10px;
-    }
-    
-    .check-icon {
-        color: #0d8b80;
-        font-weight: bold;
-        font-size: 1.1rem;
-        line-height: 1;
-    }
-    
-    .check-text {
-        font-size: 0.94rem;
-        color: #3b485e;
-        line-height: 1.5;
-    }
-    
     /* Badge tag */
     .badge {
         background: rgba(13, 139, 128, 0.12);
@@ -640,7 +619,7 @@ with col_right:
         
         highlights_li = ""
         if resolved_dest["highlights"]:
-            highlights_li = "<div style='margin-top:14px; font-size:0.92rem;'><b>📍 Local Highlights:</b><ul style='margin: 8px 0 0 0; padding-left: 18px; color: #3b485e;'>"
+            highlights_li = "<div style='margin-top:14px; font-size:0.92rem;'><b><svg viewBox='0 0 24 24' width='15' height='15' fill='none' stroke='#172033' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' style='display:inline; vertical-align:middle; margin-right:4px;'><path d='M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z'/><circle cx='12' cy='10' r='3'/></svg> Local Highlights:</b><ul style='margin: 8px 0 0 0; padding-left: 18px; color: #3b485e;'>"
             for h in resolved_dest["highlights"]:
                 highlights_li += f"<li style='margin-bottom: 6px;'><b>{h['name']}</b>: {h['blurb']}</li>"
             highlights_li += "</ul></div>"
@@ -666,7 +645,7 @@ with col_right:
         
         st.markdown(map_footer_html, unsafe_allow_html=True)
         
-        # 4. Budget Split Card (Premium grid style with progress)
+        # 4. Budget Split Card (Premium grid style with inline SVG icons for 100% rendering)
         costs = build_budget_split(st.session_state["form_budget"], st.session_state["form_style"])
         percentages = {
             "Budget": {"travel": 32, "stay": 24, "food": 24, "buffer": 20},
@@ -674,17 +653,23 @@ with col_right:
             "Comfort": {"travel": 26, "stay": 34, "food": 24, "buffer": 16}
         }[st.session_state["form_style"]]
         
+        # Inline SVG definitions
+        svg_travel = "<svg viewBox='0 0 24 24' width='20' height='20' fill='none' stroke='#1272d9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3.5c-.5-.5-2.5 0-4 1.5L13.5 8.5 5.3 6.7c-.9-.2-1.9.1-2.4.9l-1.1 1.9c-.4.7-.2 1.7.5 2.1l7.6 4.3-1.8 1.8-3.4-.6c-.7-.1-1.4.1-1.8.6L1.8 18.8c-.4.5-.4 1.3 0 1.7l1.7 1.7c.4.4 1.2.4 1.7 0l1.1-1.1c.5-.5.7-1.2.6-1.8l-.6-3.4 1.8-1.8 4.3 7.6c.4.7 1.4.9 2.1.5l1.9-1.1c.8-.5 1.1-1.5.9-2.4z'/></svg>"
+        svg_stay = "<svg viewBox='0 0 24 24' width='20' height='20' fill='none' stroke='#0d8b80' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/><polyline points='9 22 9 12 15 12 15 22'/></svg>"
+        svg_food = "<svg viewBox='0 0 24 24' width='20' height='20' fill='none' stroke='#f0a53a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v4M21 15V2v0a5 5 0 0 0-5 5v3c0 1.1.9 2 2 2h3Zm0 0v7M12 15v7'/></svg>"
+        svg_buffer = "<svg viewBox='0 0 24 24' width='20' height='20' fill='none' stroke='#61708a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M20 13c0 5-3.5 7.5-7.66 9.7a1 1 0 0 1-.68 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 .76-.97l8-2a1 1 0 0 1 .48 0l8 2A1 1 0 0 1 20 6z'/></svg>"
+        
         items = [
-            ("Travel", costs["travel"], percentages["travel"], "✈️", "rgba(18, 114, 217, 0.1)", "#1272d9"),
-            ("Stay", costs["stay"], percentages["stay"], "🏨", "rgba(13, 139, 128, 0.1)", "#0d8b80"),
-            ("Food", costs["food"], percentages["food"], "🍔", "rgba(240, 165, 58, 0.1)", "#f0a53a"),
-            ("Buffer", costs["buffer"], percentages["buffer"], "🛡️", "rgba(97, 112, 138, 0.1)", "#61708a")
+            ("Travel", costs["travel"], percentages["travel"], svg_travel, "rgba(18, 114, 217, 0.1)", "#1272d9"),
+            ("Stay", costs["stay"], percentages["stay"], svg_stay, "rgba(13, 139, 128, 0.1)", "#0d8b80"),
+            ("Food", costs["food"], percentages["food"], svg_food, "rgba(240, 165, 58, 0.1)", "#f0a53a"),
+            ("Buffer", costs["buffer"], percentages["buffer"], svg_buffer, "rgba(97, 112, 138, 0.1)", "#61708a")
         ]
         
         cost_cards_html = ""
-        for name, amount, pct, icon, bg, color in items:
+        for name, amount, pct, svg_code, bg, color in items:
             cost_cards_html += f'<div style="background: #ffffff; border: 1px solid rgba(23,32,51,0.08); border-radius: 16px; padding: 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.01);">'
-            cost_cards_html += f'<div style="width: 42px; height: 42px; border-radius: 12px; background: {bg}; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">{icon}</div>'
+            cost_cards_html += f'<div style="width: 42px; height: 42px; border-radius: 12px; background: {bg}; display: flex; align-items: center; justify-content: center;">{svg_code}</div>'
             cost_cards_html += f'<div style="flex-grow: 1;">'
             cost_cards_html += f'<div style="display: flex; justify-content: space-between; align-items: baseline;">'
             cost_cards_html += f'<span style="font-size: 0.75rem; color: #61708a; text-transform: uppercase; letter-spacing: 0.05em; font-weight:600;">{name}</span>'
@@ -733,7 +718,7 @@ with col_right:
             
         st.markdown(f'<div class="glass-card"><h4 style="margin:0 0 14px 0; font-size: 1.1rem; font-weight: 800; color: #172033; text-transform: uppercase; letter-spacing: 0.05em;">Day-wise Timeline</h4><div style="position: relative; border-left: 2px solid rgba(18, 114, 217, 0.15); margin-left: 31px; margin-top: 14px; padding-bottom: 1px;">{timeline_items_html}</div></div>', unsafe_allow_html=True)
         
-        # 6. Packing & Safety Card (Checklist style)
+        # 6. Packing & Safety Card (Checklist style with SVG checks)
         tips_list = [
             f"Save offline maps and keep the {resolved_dest['name']} hotel or hostel address pinned.",
             "Carry student ID, one power bank, refillable water bottle, and emergency cash.",
@@ -758,7 +743,7 @@ with col_right:
         checklist_items_html = ""
         for t in tips_list:
             checklist_items_html += f'<div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px;">'
-            checklist_items_html += f'<div style="color: #0d8b80; font-weight: bold; font-size: 1.1rem; line-height: 1;">✓</div>'
+            checklist_items_html += f'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#0d8b80" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 3px;"><polyline points="20 6 9 17 4 12"/></svg>'
             checklist_items_html += f'<span style="font-size: 0.94rem; color: #3b485e; line-height: 1.5;">{t}</span>'
             checklist_items_html += f'</div>'
             
