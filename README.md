@@ -4,6 +4,14 @@ CampusTrail AI is a modern, student-focused travel planner designed to build bud
 
 ---
 
+## 🔗 Live Demo Links
+
+Access the fully functional live application instantly over the web:
+- **Primary Server Link**: [https://fad2c963711fd8.lhr.life](https://fad2c963711fd8.lhr.life) (Powered by `localhost.run`)
+- **Secondary Backup Link**: [https://dry-doodles-decide.loca.lt](https://dry-doodles-decide.loca.lt) (Powered by `localtunnel`)
+
+---
+
 ## 🌟 Key Features
 
 - **🎓 Student-Oriented Layout**: Optimized for budget constraints and group configurations (solo, friends, couples, families).
@@ -56,6 +64,14 @@ streamlit run app.py
 ```
 
 The app will open automatically in your browser at `http://localhost:8501`.
+
+---
+
+## 📓 Try it Instantly (Jupyter Notebook / Google Colab)
+
+For an instant test run without setting up Python environments manually on your system, you can use the included Jupyter notebook:
+1. Open the [run_notebook.ipynb](file:///home/babydemonx/Documents/Project/CampusTrailAI/run_notebook.ipynb) locally, or upload it to [Google Colab](https://colab.research.google.com/).
+2. Run the cells in order to install requirements, launch the Streamlit server in the background, and expose a secure public URL.
 
 ---
 
