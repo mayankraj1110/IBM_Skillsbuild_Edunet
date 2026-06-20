@@ -8,7 +8,7 @@ CampusTrail AI is a modern, student-focused travel planner designed to build bud
 
 - **🎓 Student-Oriented Layout**: Optimized for budget constraints and group configurations (solo, friends, couples, families).
 - **📊 Automatic Budget Splitting**: Dynamically divides your budget across Travel, Stays, Food, and Buffer based on your travel style (Budget, Balanced, Comfort).
-- **🗺️ Interactive Folium Maps**: Integrates Leaflet-based maps displaying the destination, circle markers for local highlights, and distance lines from your starting location.
+- **🗺️ Interactive HTML Maps**: Uses `folium` to display interactive maps inside Gradio, showing the destination, markers for local highlights, and routing lines between your starting location and target.
 - **⚡ Preset Configurations**: Quick-start templates for major destinations like **Weekend Goa**, **Budget Jaipur**, and **Nature Manali**.
 - **🔍 Geocoding Integration**: Queries OpenStreetMap's Nominatim API to locate destinations worldwide in real-time, loading coordinates, seasons, transport guidelines, and transit hubs.
 - **🎨 Glassmorphic Aesthetic**: Designed with custom responsive CSS styling that provides a high-end, premium experience.
@@ -19,10 +19,8 @@ CampusTrail AI is a modern, student-focused travel planner designed to build bud
 
 ```text
 CampusTrailAI/
-├── .streamlit/
-│   └── config.toml         # Custom theme configuration for Streamlit
 ├── .gitignore              # Ignores venv, cache, and system files
-├── app.py                  # Main Streamlit application file
+├── app.py                  # Main Gradio application file
 ├── requirements.txt        # Python package dependencies
 └── README.md               # Project documentation (this file)
 ```
@@ -50,12 +48,12 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. Run the Streamlit application
+### 4. Run the Gradio application
 ```bash
-streamlit run app.py
+python app.py
 ```
 
-The app will open automatically in your browser at `http://localhost:8501`.
+The app will start locally, opening a browser tab automatically. Additionally, because the application is launched with sharing enabled, it will print a secure, public shareable link (e.g., `https://xxxx.gradio.live`) in the console.
 
 ---
 
@@ -63,14 +61,8 @@ The app will open automatically in your browser at `http://localhost:8501`.
 
 This project is ready to be deployed to the cloud for free:
 
-### Option A: Streamlit Community Cloud (Recommended)
-1. Push this repository to your **GitHub** account.
-2. Visit [share.streamlit.io](https://share.streamlit.io/) and log in with your GitHub account.
-3. Click **New app**, select your repository (`CampusTrailAI`), branch (`main`), and set the main file path to `app.py`.
-4. Click **Deploy!** Your app will be live with a permanent URL.
-
-### Option B: Hugging Face Spaces
-1. Create a new Space on [Hugging Face](https://huggingface.co/spaces).
-2. Choose **Streamlit** as the SDK.
-3. Clone the space repository locally or upload these project files (`app.py`, `requirements.txt`, `.streamlit/`) directly.
-4. Commit and push the files. Hugging Face will automatically build and deploy the app.
+### Option A: Hugging Face Spaces (Recommended for Gradio)
+1. Visit [huggingface.co/spaces](https://huggingface.co/spaces) and create a new Space.
+2. Select **Gradio** as the SDK.
+3. Clone the space repository locally or upload these files (`app.py`, `requirements.txt`) directly via the web interface.
+4. Commit and push the files. Hugging Face will automatically build and host the Gradio app on a permanent public URL.

@@ -1,178 +1,160 @@
-import streamlit as st
+import gradio as gr
 import folium
-from streamlit_folium import st_folium
 import requests
 import math
 
-# Page configuration
-st.set_page_config(
-    page_title="CampusTrail AI Travel Planner",
-    page_icon="✈️",
-    layout="wide",
-    initial_sidebar_state="collapsed",
-)
+# Custom CSS for glassmorphic styling, fonts, and grid layout in Gradio
+css = """
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
 
-# Inject custom CSS for premium styling
-st.markdown("""
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
-    
-    html, body, [class*="css"] {
-        font-family: 'Outfit', sans-serif;
-    }
-    
-    .main {
-        background: 
-            radial-gradient(circle at top left, rgba(18, 114, 217, 0.15), transparent 40%),
-            radial-gradient(circle at 85% 15%, rgba(240, 165, 58, 0.15), transparent 30%),
-            linear-gradient(140deg, #dff2ff 0%, #edf8ff 40%, #fdf7e9 100%);
-        background-attachment: fixed;
-    }
-    
-    /* Premium Glassmorphic Cards */
-    .glass-card {
-        background: rgba(255, 255, 255, 0.72);
-        border: 1px solid rgba(23, 32, 51, 0.12);
-        border-radius: 24px;
-        padding: 24px;
-        margin-bottom: 20px;
-        backdrop-filter: blur(12px);
-        box-shadow: 0 10px 30px rgba(17, 44, 80, 0.05);
-    }
-    
-    .hero-section {
-        background: rgba(248, 251, 255, 0.85);
-        border: 1px solid rgba(255, 255, 255, 0.45);
-        border-radius: 30px;
-        padding: 38px;
-        margin-bottom: 24px;
-        backdrop-filter: blur(14px);
-        box-shadow: 0 25px 60px rgba(17, 44, 80, 0.08);
-    }
-    
-    .eyebrow {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        border-radius: 999px;
-        padding: 6px 14px;
-        background: rgba(18, 114, 217, 0.1);
-        color: #1272d9;
-        font-size: 0.8rem;
-        font-weight: 600;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        margin-bottom: 12px;
-    }
-    
-    h1 {
-        font-size: clamp(2.2rem, 4vw, 3.8rem) !important;
-        font-weight: 800 !important;
-        line-height: 1.0 !important;
-        letter-spacing: -0.04em !important;
-        margin: 0 0 16px 0 !important;
-        color: #172033 !important;
-    }
-    
-    .hero-desc {
-        color: #61708a;
-        font-size: 1.08rem;
-        line-height: 1.6;
-        margin: 0;
-        max-width: 800px;
-    }
-    
-    .section-title {
-        font-size: 1.25rem !important;
-        font-weight: 700 !important;
-        color: #172033;
-        margin-bottom: 16px;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-    
-    /* Preset Chips */
-    .preset-btn {
-        border-radius: 999px !important;
-        background: white !important;
-        border: 1px solid rgba(23, 32, 51, 0.12) !important;
-        color: #172033 !important;
-        font-weight: 600 !important;
-        font-size: 0.9rem !important;
-        padding: 8px 16px !important;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02) !important;
-    }
-    
-    /* Metric styling */
-    .metric-card {
-        background: rgba(255, 255, 255, 0.9);
-        border: 1px solid rgba(23, 32, 51, 0.1);
-        border-radius: 16px;
-        padding: 12px 16px;
-        text-align: center;
-    }
-    
-    .metric-label {
-        font-size: 0.78rem;
-        color: #61708a;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 4px;
-        display: block;
-    }
-    
-    .metric-value {
-        font-size: 1.15rem;
-        font-weight: 700;
-        color: #172033;
-    }
-    
-    /* Itinerary Day Cards */
-    .day-card {
-        background: linear-gradient(135deg, rgba(18, 114, 217, 0.05), rgba(13, 139, 128, 0.04));
-        border: 1px solid rgba(18, 114, 217, 0.1);
-        border-radius: 16px;
-        padding: 16px;
-        margin-bottom: 12px;
-    }
-    
-    .day-num {
-        font-size: 1rem;
-        font-weight: 700;
-        color: #1272d9;
-        display: block;
-        margin-bottom: 4px;
-    }
-    
-    .day-desc {
-        font-size: 0.95rem;
-        color: #3b485e;
-        line-height: 1.6;
-    }
-    
-    /* Tips List */
-    .tip-item {
-        color: #3b485e;
-        margin-bottom: 8px;
-        line-height: 1.5;
-        font-size: 0.95rem;
-    }
-    
-    .badge {
-        display: inline-block;
-        border-radius: 999px;
-        padding: 6px 12px;
-        font-size: 0.82rem;
-        font-weight: 700;
-        background: rgba(13, 139, 128, 0.12);
-        color: #0d8b80;
-    }
-</style>
-""", unsafe_allow_html=True)
+body, .gradio-container {
+    font-family: 'Outfit', sans-serif !important;
+    background: 
+        radial-gradient(circle at top left, rgba(18, 114, 217, 0.08), transparent 40%),
+        radial-gradient(circle at 85% 15%, rgba(240, 165, 58, 0.08), transparent 30%),
+        linear-gradient(140deg, #dff2ff 0%, #edf8ff 40%, #fdf7e9 100%) !important;
+    background-attachment: fixed !important;
+}
 
-# Datasets
+.hero-banner {
+    background: rgba(248, 251, 255, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 30px;
+    padding: 30px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 20px 50px rgba(17, 44, 80, 0.06);
+}
+
+.eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 999px;
+    padding: 6px 14px;
+    background: rgba(18, 114, 217, 0.1);
+    color: #1272d9;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.hero-title {
+    font-size: clamp(2rem, 3.5vw, 3.5rem);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+    margin: 0 0 10px 0;
+    color: #172033;
+}
+
+.hero-desc {
+    color: #61708a;
+    font-size: 1.02rem;
+    line-height: 1.6;
+    margin: 0;
+    max-width: 800px;
+}
+
+/* Glassmorphic output styling */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.72) !important;
+    border: 1px solid rgba(23, 32, 51, 0.12) !important;
+    border-radius: 24px !important;
+    padding: 20px !important;
+    backdrop-filter: blur(12px) !important;
+    box-shadow: 0 10px 30px rgba(17, 44, 80, 0.04) !important;
+    margin-bottom: 16px !important;
+}
+
+.section-hdr {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #172033;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(23, 32, 51, 0.08);
+    padding-bottom: 6px;
+}
+
+/* Metric grids */
+.metric-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.budget-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.metric-card {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(23, 32, 51, 0.08);
+    border-radius: 14px;
+    padding: 10px;
+    text-align: center;
+}
+
+.metric-label {
+    font-size: 0.75rem;
+    color: #61708a;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.metric-val {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #172033;
+}
+
+/* Day Cards */
+.day-card {
+    background: linear-gradient(135deg, rgba(18, 114, 217, 0.05), rgba(13, 139, 128, 0.04));
+    border: 1px solid rgba(18, 114, 217, 0.08);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 10px;
+}
+
+.day-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1272d9;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.day-text {
+    font-size: 0.9rem;
+    color: #3b485e;
+    line-height: 1.5;
+}
+
+/* General Layout helpers */
+.badge {
+    background: rgba(13, 139, 128, 0.12);
+    color: #0d8b80;
+    font-weight: 700;
+    font-size: 0.8rem;
+    padding: 4px 10px;
+    border-radius: 999px;
+}
+"""
+
+# Presets and Data
 sample_trips = {
-    "Goa (Weekend)": {
+    "Goa": {
         "destination": "Goa",
         "days": 3,
         "budget": 9000,
@@ -181,7 +163,7 @@ sample_trips = {
         "focus": "Food",
         "notes": "Prefer beaches, affordable cafes, scooter travel, and a relaxed night market."
     },
-    "Jaipur (Budget)": {
+    "Jaipur": {
         "destination": "Jaipur",
         "days": 2,
         "budget": 5000,
@@ -190,7 +172,7 @@ sample_trips = {
         "focus": "Culture",
         "notes": "Want forts, local street food, shared transport, and photo spots."
     },
-    "Manali (Nature)": {
+    "Manali": {
         "destination": "Manali",
         "days": 4,
         "budget": 8500,
@@ -284,100 +266,54 @@ focus_plans = {
     ]
 }
 
-# Helper functions
+# Helper calculations
 def get_budget_band(amount):
-    if amount < 5000:
-        return "Low"
-    elif amount < 9000:
-        return "Medium"
+    if amount < 5000: return "Low"
+    if amount < 9000: return "Medium"
     return "High"
 
-def build_budget_split(amount, trip_style):
+def build_budget_split(amount, style):
     ratios = {
         "Budget": {"travel": 0.32, "stay": 0.24, "food": 0.24, "buffer": 0.20},
         "Balanced": {"travel": 0.30, "stay": 0.28, "food": 0.24, "buffer": 0.18},
         "Comfort": {"travel": 0.26, "stay": 0.34, "food": 0.24, "buffer": 0.16}
     }
-    ratio = ratios[trip_style]
+    ratio = ratios[style]
     return {k: amount * v for k, v in ratio.items()}
 
-def build_day_plan(location, total_days, trip_focus, trip_style):
-    base_plans = focus_plans.get(trip_focus, focus_plans["Mixed"])
-    items = []
-    trip_location = location if location else "your destination"
-    
-    for i in range(1, total_days + 1):
-        if i == 1:
-            intro = f"Arrive in {trip_location}, settle in, and map nearby transport and food options."
-        elif i == total_days:
-            intro = f"Keep the final day lighter, buy essentials, and prepare return travel."
-        else:
-            intro = "Use the day for focused exploration with a student-budget schedule."
-            
-        style_line = ""
-        if trip_style == "Budget":
-            style_line = "Prefer buses, shared autos, hostels, and fixed daily spending."
-        elif trip_style == "Comfort":
-            style_line = "Use direct transport, better stays, and reserved time for rest."
-        else:
-            style_line = "Mix public transport with one convenience upgrade if needed."
-            
-        base_action = base_plans[(i - 1) % len(base_plans)]
-        items.append({
-            "title": f"Day {i}",
-            "text": f"{intro} {base_action} {style_line}"
-        })
-    return items
+def distance_km(from_coords, to_coords):
+    lat1, lng1 = from_coords
+    lat2, lng2 = to_coords
+    r = 6371
+    d_lat = math.radians(lat2 - lat1)
+    d_lng = math.radians(lng2 - lng1)
+    a = (math.sin(d_lat / 2) ** 2 +
+         math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) *
+         math.sin(d_lng / 2) ** 2)
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return r * c
 
-def build_tips(location, trip_focus, travel_group, user_notes):
-    trip_location = location if location else "destination"
-    tips = [
-        f"Save offline maps and keep the {trip_location} hotel or hostel address pinned.",
-        "Carry student ID, one power bank, refillable water bottle, and emergency cash.",
-        "Check local transport closing times before planning late evening travel."
-    ]
-    
-    if trip_focus in ["Adventure", "Nature"]:
-        tips.append("Pack walking shoes, weather protection, and basic medicines.")
-    elif trip_focus == "Food":
-        tips.append("Set a food budget cap for each day and shortlist clean, well-rated places.")
-    else:
-        tips.append("Start early to avoid crowds and reduce transport waiting time.")
-        
-    if travel_group == "Solo":
-        tips.append("Share your live location or daily route summary with a trusted contact.")
-    else:
-        tips.append("Set one common meet-up point in case the group splits during the day.")
-        
-    if user_notes.strip():
-        truncated_notes = user_notes.strip()[:90] + ("..." if len(user_notes.strip()) > 90 else "")
-        tips.append(f"Planner note used: {truncated_notes}")
-        
-    return tips
-
-def find_destination_data(query):
+def find_local_dest(query):
     normalized = query.strip().lower()
-    if not normalized:
-        return None
+    if not normalized: return None
     for name, data in destination_data.items():
         if any(alias in normalized for alias in data["aliases"]):
             return name, data
     return None
 
-def geocode_destination(query):
+def geocode_dest(query):
     try:
         url = f"https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q={requests.utils.quote(query)}"
-        headers = {"User-Agent": "CampusTrailAI/1.0"}
-        response = requests.get(url, headers=headers, timeout=5)
-        if response.ok and response.json():
-            data = response.json()[0]
-            return data
+        headers = {"User-Agent": "CampusTrailAI-Gradio/1.0"}
+        res = requests.get(url, headers=headers, timeout=5)
+        if res.ok and res.json():
+            return res.json()[0]
     except Exception:
         pass
     return None
 
-def resolve_destination(query):
-    local = find_destination_data(query)
+def resolve_dest(query):
+    local = find_local_dest(query)
     if local:
         name, data = local
         return {
@@ -390,11 +326,8 @@ def resolve_destination(query):
             "season": data["season"],
             "highlights": data["highlights"]
         }
-    
-    if not query.strip():
-        return None
-        
-    geocoded = geocode_destination(query)
+    if not query.strip(): return None
+    geocoded = geocode_dest(query)
     if geocoded:
         label = ", ".join(geocoded.get("display_name", "").split(",")[:2]).strip()
         return {
@@ -409,342 +342,363 @@ def resolve_destination(query):
         }
     return None
 
-def distance_km(from_coords, to_coords):
-    lat1, lng1 = from_coords
-    lat2, lng2 = to_coords
-    r = 6371  # Earth radius in km
-    d_lat = math.radians(lat2 - lat1)
-    d_lng = math.radians(lng2 - lng1)
-    a = (math.sin(d_lat / 2) ** 2 +
-         math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) *
-         math.sin(d_lng / 2) ** 2)
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-    return r * c
-
-# App Header
-st.markdown("""
-<div class="hero-section">
-    <div class="eyebrow">Capstone Project • AI Travel Planner</div>
-    <h1>CampusTrail AI</h1>
-    <p class="hero-desc">
-        A student-focused travel planner that builds a budget-friendly trip outline from destination,
-        budget, number of days, travel style, and interests. It creates a day-wise plan, cost split,
-        packing checklist, and practical tips in one screen.
-    </p>
-</div>
-""", unsafe_allow_html=True)
-
-# Initialize Session State for form values
-if "form_destination" not in st.session_state:
-    st.session_state["form_destination"] = ""
-if "form_days" not in st.session_state:
-    st.session_state["form_days"] = 3
-if "form_budget" not in st.session_state:
-    st.session_state["form_budget"] = 6000
-if "form_group" not in st.session_state:
-    st.session_state["form_group"] = "Friends"
-if "form_style" not in st.session_state:
-    st.session_state["form_style"] = "Balanced"
-if "form_focus" not in st.session_state:
-    st.session_state["form_focus"] = "Culture"
-if "form_notes" not in st.session_state:
-    st.session_state["form_notes"] = ""
-if "start_coords" not in st.session_state:
-    st.session_state["start_coords"] = None
-if "start_location_name" not in st.session_state:
-    st.session_state["start_location_name"] = ""
-
-# Handle Preset Clicks
-def apply_preset(preset_name):
-    p = sample_trips[preset_name]
-    st.session_state["form_destination"] = p["destination"]
-    st.session_state["form_days"] = p["days"]
-    st.session_state["form_budget"] = p["budget"]
-    st.session_state["form_group"] = p["group"]
-    st.session_state["form_style"] = p["style"]
-    st.session_state["form_focus"] = p["focus"]
-    st.session_state["form_notes"] = p["notes"]
-
-def reset_fields():
-    st.session_state["form_destination"] = ""
-    st.session_state["form_days"] = 3
-    st.session_state["form_budget"] = 6000
-    st.session_state["form_group"] = "Friends"
-    st.session_state["form_style"] = "Balanced"
-    st.session_state["form_focus"] = "Culture"
-    st.session_state["form_notes"] = ""
-    st.session_state["start_coords"] = None
-    st.session_state["start_location_name"] = ""
-
-# Primary layout
-col_left, col_right = st.columns([0.95, 1.05], gap="large")
-
-with col_left:
-    st.markdown('<div class="section-title">Plan a Trip</div>', unsafe_allow_html=True)
-    st.write("Fill the trip details or use one of the sample presets. The planner pairs itinerary output with a live map view and destination metadata.")
-    
-    # Presets row
-    preset_cols = st.columns(len(sample_trips) + 1)
-    for index, name in enumerate(sample_trips.keys()):
-        with preset_cols[index]:
-            if st.button(name, key=f"preset_{index}", use_container_width=True):
-                apply_preset(name)
-    with preset_cols[-1]:
-        if st.button("Reset Form", key="reset_btn", type="secondary", use_container_width=True):
-            reset_fields()
-            
-    # Form fields inside a container card
-    st.markdown('<div class="glass-card">', unsafe_allow_html=True)
-    
-    input_col1, input_col2 = st.columns(2)
-    with input_col1:
-        dest_val = st.text_input("Destination", value=st.session_state["form_destination"], placeholder="Jaipur, Goa, Manali", key="dest_input")
-        st.session_state["form_destination"] = dest_val
-        
-        budget_val = st.number_input("Budget (INR)", min_value=1000, step=500, value=st.session_state["form_budget"], key="budget_input")
-        st.session_state["form_budget"] = budget_val
-        
-        style_val = st.selectbox("Travel Style", ["Budget", "Balanced", "Comfort"], index=["Budget", "Balanced", "Comfort"].index(st.session_state["form_style"]), key="style_input")
-        st.session_state["form_style"] = style_val
-
-    with input_col2:
-        days_val = st.selectbox("Trip Duration", [2, 3, 4, 5], index=[2, 3, 4, 5].index(st.session_state["form_days"]), key="days_input")
-        st.session_state["form_days"] = days_val
-        
-        group_val = st.selectbox("Travel Group", ["Solo", "Friends", "Couple", "Family"], index=["Solo", "Friends", "Couple", "Family"].index(st.session_state["form_group"]), key="group_input")
-        st.session_state["form_group"] = group_val
-        
-        focus_val = st.selectbox("Trip Focus", ["Culture", "Adventure", "Food", "Nature", "Mixed"], index=["Culture", "Adventure", "Food", "Nature", "Mixed"].index(st.session_state["form_focus"]), key="focus_input")
-        st.session_state["form_focus"] = focus_val
-
-    notes_val = st.text_area("Preferences", value=st.session_state["form_notes"], placeholder="Example: prefer trains, low-cost stays, local food, sunrise spots, and safe evening plans.", key="notes_input")
-    st.session_state["form_notes"] = notes_val
-    
-    # Distance comparison helper (live location)
-    st.markdown("<hr style='margin: 15px 0; opacity: 0.15;'/>", unsafe_allow_html=True)
-    st.write("**Route Planning (Distance from Your Location)**")
-    route_col1, route_col2 = st.columns([1.3, 0.7])
-    with route_col1:
-        start_loc = st.text_input("Your Starting Location", value=st.session_state["start_location_name"], placeholder="e.g. Mumbai, Delhi, Bangalore", label_visibility="collapsed")
-    with route_col2:
-        if st.button("Resolve Distance", use_container_width=True, type="secondary"):
-            if start_loc.strip():
-                with st.spinner("Locating your starting point..."):
-                    start_resolved = resolve_destination(start_loc)
-                    if start_resolved:
-                        st.session_state["start_coords"] = start_resolved["center"]
-                        st.session_state["start_location_name"] = start_resolved["name"]
-                        st.toast(f"Located start: {start_resolved['name']}", icon="📍")
-                    else:
-                        st.toast("Could not locate starting location.", icon="⚠️")
-            else:
-                st.session_state["start_coords"] = None
-                st.session_state["start_location_name"] = ""
-                
-    if st.session_state["start_coords"]:
-        st.info(f"📍 Route comparison active from **{st.session_state['start_location_name']}**")
-        
-    st.markdown('</div>', unsafe_allow_html=True)
-
-# Generate Itinerary Plan
-resolved_dest = None
-if st.session_state["form_destination"].strip():
-    resolved_dest = resolve_destination(st.session_state["form_destination"])
-
-with col_right:
-    st.markdown('<div class="section-title">Generated Plan</div>', unsafe_allow_html=True)
-    
-    # Header card containing summary
-    st.markdown('<div class="glass-card">', unsafe_allow_html=True)
-    badge_style = resolved_dest["name"] + " • " + st.session_state["form_style"] if resolved_dest else "Student-friendly plan"
-    st.markdown(f"""
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-            <div>
-                <h4 style="margin: 0; font-size: 1.15rem; font-weight: 700;">Trip Snapshot</h4>
+# Core logic function returning HTML strings
+def generate_itinerary(dest, days, budget, group, style, focus, notes, start_loc):
+    if not dest.strip():
+        # Default empty page HTML
+        empty_snap = f"""
+        <div class="glass-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h4 style="margin:0; font-size: 1.05rem; font-weight:700;">Trip Snapshot</h4>
+                <span class="badge">No Plan Loaded</span>
             </div>
-            <span class="badge">{badge_style}</span>
+            <div class="metric-row">
+                <div class="metric-card"><span class="metric-label">Budget Band</span><span class="metric-val">-</span></div>
+                <div class="metric-card"><span class="metric-label">Travel Style</span><span class="metric-val">-</span></div>
+                <div class="metric-card"><span class="metric-label">Duration</span><span class="metric-val">-</span></div>
+            </div>
         </div>
-    """, unsafe_allow_html=True)
-    
-    # Trip snapshot metrics
-    snap_col1, snap_col2, snap_col3 = st.columns(3)
-    with snap_col1:
-        st.markdown(f"""
-        <div class="metric-card">
-            <span class="metric-label">Budget Band</span>
-            <span class="metric-value">{get_budget_band(st.session_state["form_budget"])}</span>
+        """
+        empty_overview = """
+        <div class="glass-panel">
+            <div class="section-hdr">Trip Overview</div>
+            <p style="color: #61708a; margin: 0;">Enter details on the left and submit to generate your student-friendly itinerary.</p>
         </div>
-        """, unsafe_allow_html=True)
-    with snap_col2:
-        st.markdown(f"""
-        <div class="metric-card">
-            <span class="metric-label">Travel Style</span>
-            <span class="metric-value">{st.session_state["form_style"]}</span>
+        """
+        # Create empty map
+        m = folium.Map(location=[22.9734, 78.6569], zoom_start=5, tiles="OpenStreetMap")
+        map_html = m._repr_html_()
+        return empty_snap, empty_overview, map_html, "", "", ""
+
+    resolved = resolve_dest(dest)
+    if not resolved:
+        error_snap = f"""
+        <div class="glass-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h4 style="margin:0; font-size: 1.05rem; font-weight:700;">Trip Snapshot</h4>
+                <span class="badge" style="background: rgba(220,53,69,0.1); color: #dc3545;">Lookup Failed</span>
+            </div>
         </div>
-        """, unsafe_allow_html=True)
-    with snap_col3:
-        st.markdown(f"""
-        <div class="metric-card">
-            <span class="metric-label">Duration</span>
-            <span class="metric-value">{st.session_state["form_days"]} Days</span>
+        """
+        error_overview = f"""
+        <div class="glass-panel">
+            <div class="section-hdr">Trip Overview</div>
+            <p style="color: #dc3545; margin: 0;">Could not locate destination <b>"{dest}"</b> on the map. Please check your spelling or connection.</p>
         </div>
-        """, unsafe_allow_html=True)
-        
-    summary_text = "Ready to build a student trip. Enter destination to begin."
-    if resolved_dest:
-        summary_text = f"{resolved_dest['name']} {st.session_state['form_focus'].lower()} trip for {st.session_state['form_group'].lower()} travelers."
-    st.markdown(f"""
-        <div style="margin-top: 14px; padding: 12px; background: rgba(255,255,255,0.5); border-radius: 12px; font-size: 0.9rem; color: #172033; font-weight: 600;">
-            <span style="color: #61708a; display: block; font-size: 0.78rem; text-transform: uppercase; margin-bottom: 2px;">Planner Summary</span>
-            {summary_text}
+        """
+        m = folium.Map(location=[22.9734, 78.6569], zoom_start=5)
+        return error_snap, error_overview, m._repr_html_(), "", "", ""
+
+    # Geocode starting location if provided
+    start_coords = None
+    resolved_start_name = ""
+    if start_loc.strip():
+        start_resolved = resolve_dest(start_loc)
+        if start_resolved:
+            start_coords = start_resolved["center"]
+            resolved_start_name = start_resolved["name"]
+
+    # 1. Snapshot HTML
+    badge = f"{resolved['name']} • {style}"
+    snap_html = f"""
+    <div class="glass-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h4 style="margin:0; font-size:1.05rem; font-weight:700;">Trip Snapshot</h4>
+            <span class="badge">{badge}</span>
         </div>
-    """, unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Display Plan
-    if not resolved_dest:
-        st.info("👈 Enter a destination in the form on the left to generate the complete student itinerary and load the interactive map.")
-    else:
-        # Trip Overview Card
-        st.markdown('<div class="glass-card">', unsafe_allow_html=True)
-        st.markdown('<h4 style="margin:0 0 10px 0; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: #172033;">Trip Overview</h4>', unsafe_allow_html=True)
-        overview_msg = f"CampusTrail suggests a {st.session_state['form_days']}-day {st.session_state['form_focus'].lower()} trip to {resolved_dest['name']} for a {st.session_state['form_group'].lower()} group with a budget of Rs {st.session_state['form_budget']:,}. The plan aims to keep travel practical, affordable, and student-friendly."
-        st.write(overview_msg)
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        # Map & Location Card
-        st.markdown('<div class="glass-card">', unsafe_allow_html=True)
-        st.markdown('<h4 style="margin:0 0 10px 0; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: #172033;">Map & Location Insights</h4>', unsafe_allow_html=True)
-        
-        # Metadata Columns
-        coords_str = f"{resolved_dest['center'][0]:.4f}, {resolved_dest['center'][1]:.4f}"
-        meta_col1, meta_col2 = st.columns(2)
-        with meta_col1:
-            st.markdown(f"**Coordinates:** `{coords_str}`")
-            st.markdown(f"**Best Base:** {resolved_dest['base']}")
-        with meta_col2:
-            st.markdown(f"**Transport:** {resolved_dest['transport']}")
-            st.markdown(f"**Best Season:** {resolved_dest['season']}")
-            
-        # Draw Map
-        m = folium.Map(location=resolved_dest["center"], zoom_start=resolved_dest["zoom"], tiles="OpenStreetMap")
-        
-        # Destination Marker
+        <div class="metric-row">
+            <div class="metric-card">
+                <span class="metric-label">Budget Band</span>
+                <span class="metric-val">{get_budget_band(budget)}</span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-label">Travel Style</span>
+                <span class="metric-val">{style}</span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-label">Duration</span>
+                <span class="metric-val">{days} Days</span>
+            </div>
+        </div>
+        <div style="margin-top: 12px; padding: 10px; background: rgba(255,255,255,0.6); border-radius: 10px; font-size: 0.88rem; font-weight: 600;">
+            <span style="color: #61708a; display: block; font-size: 0.72rem; text-transform: uppercase; margin-bottom: 2px;">Planner Summary</span>
+            {resolved['name']} {focus.lower()} trip for {group.lower()} travelers.
+        </div>
+    </div>
+    """
+
+    # 2. Overview HTML
+    overview_text = f"CampusTrail suggests a {days}-day {focus.lower()} trip to {resolved['name']} for a {group.lower()} group with a budget of Rs {int(budget):,}. The plan aims to keep travel practical, affordable, and student-friendly."
+    overview_html = f"""
+    <div class="glass-panel">
+        <div class="section-hdr">Trip Overview</div>
+        <p style="margin: 0; color: #3b485e; line-height:1.6;">{overview_text}</p>
+    </div>
+    """
+
+    # 3. Folium Map HTML
+    m = folium.Map(location=resolved["center"], zoom_start=resolved["zoom"], tiles="OpenStreetMap")
+    folium.Marker(
+        location=resolved["center"],
+        popup=f"<b>{resolved['name']}</b><br>Primary Destination",
+        tooltip=resolved["name"],
+        icon=folium.Icon(color="red", icon="info-sign")
+    ).add_to(m)
+
+    for spot in resolved["highlights"]:
+        folium.CircleMarker(
+            location=spot["coords"],
+            radius=7,
+            popup=f"<b>{spot['name']}</b><br>{spot['blurb']}",
+            tooltip=spot["name"],
+            color="#1272d9",
+            fill=True,
+            fill_color="#f0a53a",
+            fill_opacity=0.85
+        ).add_to(m)
+
+    distance_status = ""
+    if start_coords:
         folium.Marker(
-            location=resolved_dest["center"],
-            popup=f"<b>{resolved_dest['name']}</b><br>Primary Destination",
-            tooltip=resolved_dest["name"],
-            icon=folium.Icon(color="red", icon="info-sign")
-        ).addTo(m)
+            location=start_coords,
+            popup=f"<b>{resolved_start_name}</b><br>Your Location",
+            tooltip=resolved_start_name,
+            icon=folium.Icon(color="green", icon="home")
+        ).add_to(m)
         
-        # Highlight Markers (if available)
-        for spot in resolved_dest["highlights"]:
-            folium.CircleMarker(
-                location=spot["coords"],
-                radius=8,
-                popup=f"<b>{spot['name']}</b><br>{spot['blurb']}",
-                tooltip=spot["name"],
-                color="#1272d9",
-                fill=True,
-                fill_color="#f0a53a",
-                fill_opacity=0.85
-            ).addTo(m)
-            
-        # User Location & Route Line
-        route_text = ""
-        if st.session_state["start_coords"]:
-            user_coords = st.session_state["start_coords"]
-            folium.Marker(
-                location=user_coords,
-                popup=f"<b>{st.session_state['start_location_name']}</b><br>Your Location",
-                tooltip=st.session_state["start_location_name"],
-                icon=folium.Icon(color="green", icon="home")
-            ).addTo(m)
-            
-            # Polyline between User and Destination
-            folium.PolyLine(
-                locations=[user_coords, resolved_dest["center"]],
-                color="#0d8b80",
-                weight=3,
-                dash_array="5, 10",
-                opacity=0.8
-            ).addTo(m)
-            
-            # Distance computation
-            dist = distance_km(user_coords, resolved_dest["center"])
-            route_text = f" • **{int(dist)} km** from starting location"
-            
-            # Adjust bounds
-            m.fit_bounds([user_coords, resolved_dest["center"]])
-            
-        # Render map using streamlit-folium
-        st_folium(m, width="100%", height=320, returned_objects=[])
+        folium.PolyLine(
+            locations=[start_coords, resolved["center"]],
+            color="#0d8b80",
+            weight=3,
+            dash_array="5, 10",
+            opacity=0.8
+        ).add_to(m)
         
-        source_label = "built-in place data loaded" if resolved_dest["source"] == "dataset" else "OpenStreetMap lookup loaded"
-        st.markdown(f"<p style='color: #61708a; font-size: 0.82rem; margin-top: 6px;'>Showing {resolved_dest['name']} on the map • {source_label}{route_text}</p>", unsafe_allow_html=True)
-        
-        # Highlights detailed text
-        if resolved_dest["highlights"]:
-            st.markdown("**Local Highlights:**")
-            for h in resolved_dest["highlights"]:
-                st.markdown(f"- **{h['name']}**: {h['blurb']}")
-        else:
-            st.markdown("*No pre-defined highlights found in the offline database. Map coordinates resolved via geocoding.*")
-            
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        # Budget Split Card
-        st.markdown('<div class="glass-card">', unsafe_allow_html=True)
-        st.markdown('<h4 style="margin:0 0 14px 0; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: #172033;">Budget Split</h4>', unsafe_allow_html=True)
-        costs = build_budget_split(st.session_state["form_budget"], st.session_state["form_style"])
-        
-        cost_cols = st.columns(4)
-        labels = ["Travel", "Stay", "Food", "Buffer"]
-        keys = ["travel", "stay", "food", "buffer"]
-        for index, col in enumerate(cost_cols):
-            with col:
-                st.markdown(f"""
-                <div class="metric-card" style="background: rgba(18,114,217,0.04);">
-                    <span class="metric-label">{labels[index]}</span>
-                    <span class="metric-value" style="color: #0d8b80;">Rs {int(costs[keys[index]]):,}</span>
-                </div>
-                """, unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        # Day-wise Itinerary Card
-        st.markdown('<div class="glass-card">', unsafe_allow_html=True)
-        st.markdown('<h4 style="margin:0 0 14px 0; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: #172033;">Day-wise Itinerary</h4>', unsafe_allow_html=True)
-        days_plan = build_day_plan(
-            resolved_dest["name"],
-            st.session_state["form_days"],
-            st.session_state["form_focus"],
-            st.session_state["form_style"]
-        )
-        
-        for item in days_plan:
-            st.markdown(f"""
-            <div class="day-card">
-                <span class="day-num">{item['title']}</span>
-                <span class="day-desc">{item['text']}</span>
-            </div>
-            """, unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        # Packing & Safety Tips Card
-        st.markdown('<div class="glass-card">', unsafe_allow_html=True)
-        st.markdown('<h4 style="margin:0 0 14px 0; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; color: #172033;">Packing & Safety</h4>', unsafe_allow_html=True)
-        tips = build_tips(
-            resolved_dest["name"],
-            st.session_state["form_focus"],
-            st.session_state["form_group"],
-            st.session_state["form_notes"]
-        )
-        for tip in tips:
-            st.markdown(f"<div class='tip-item'>• {tip}</div>", unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+        dist = distance_km(start_coords, resolved["center"])
+        distance_status = f" • <b>{int(dist)} km</b> from your starting location ({resolved_start_name})"
+        m.fit_bounds([start_coords, resolved["center"]])
 
-st.markdown("""
-<div style="text-align: center; color: #61708a; font-size: 0.85rem; padding: 20px 0;">
-    This prototype is built for demonstration. It uses OpenStreetMap via Nominatim and Folium for mapping visualizations.
-</div>
-""", unsafe_allow_html=True)
+    source_label = "built-in place data loaded" if resolved["source"] == "dataset" else "OpenStreetMap lookup loaded"
+    map_status = f"Showing {resolved['name']} on the map • {source_label}{distance_status}"
+    
+    highlights_html = ""
+    if resolved["highlights"]:
+        highlights_html = "<div style='margin-top:10px; font-size:0.88rem;'><b>Local Highlights:</b><ul>"
+        for h in resolved["highlights"]:
+            highlights_html += f"<li><b>{h['name']}</b>: {h['blurb']}</li>"
+        highlights_html += "</ul></div>"
+    
+    map_box_html = f"""
+    <div class="glass-panel">
+        <div class="section-hdr">Map & Location Insights</div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.88rem; margin-bottom:10px;">
+            <div><b>Coordinates:</b> {resolved['center'][0]:.4f}, {resolved['center'][1]:.4f}<br><b>Best Base:</b> {resolved['base']}</div>
+            <div><b>Transport:</b> {resolved['transport']}<br><b>Best Season:</b> {resolved['season']}</div>
+        </div>
+        <div style="border-radius:14px; overflow:hidden; border: 1px solid rgba(23,32,51,0.1);">{m._repr_html_()}</div>
+        <p style="color: #61708a; font-size: 0.8rem; margin: 8px 0 0 0;">{map_status}</p>
+        {highlights_html}
+    </div>
+    """
+
+    # 4. Budget Split HTML
+    costs = build_budget_split(budget, style)
+    budget_html = f"""
+    <div class="glass-panel">
+        <div class="section-hdr">Budget Split</div>
+        <div class="budget-row">
+            <div class="metric-card" style="background: rgba(18,114,217,0.04);">
+                <span class="metric-label">Travel</span>
+                <span class="metric-val" style="color: #0d8b80;">Rs {int(costs['travel']):,}</span>
+            </div>
+            <div class="metric-card" style="background: rgba(18,114,217,0.04);">
+                <span class="metric-label">Stay</span>
+                <span class="metric-val" style="color: #0d8b80;">Rs {int(costs['stay']):,}</span>
+            </div>
+            <div class="metric-card" style="background: rgba(18,114,217,0.04);">
+                <span class="metric-label">Food</span>
+                <span class="metric-val" style="color: #0d8b80;">Rs {int(costs['food']):,}</span>
+            </div>
+            <div class="metric-card" style="background: rgba(18,114,217,0.04);">
+                <span class="metric-label">Buffer</span>
+                <span class="metric-val" style="color: #0d8b80;">Rs {int(costs['buffer']):,}</span>
+            </div>
+        </div>
+    </div>
+    """
+
+    # 5. Day-wise Itinerary HTML
+    days_plan = []
+    base_plans = focus_plans.get(focus, focus_plans["Mixed"])
+    for i in range(1, days + 1):
+        if i == 1:
+            intro = f"Arrive in {resolved['name']}, settle in, and map nearby transport and food options."
+        elif i == days:
+            intro = "Keep the final day lighter, buy essentials, and prepare return travel."
+        else:
+            intro = "Use the day for focused exploration with a student-budget schedule."
+        
+        style_line = ""
+        if style == "Budget":
+            style_line = "Prefer buses, shared autos, hostels, and fixed daily spending."
+        elif style == "Comfort":
+            style_line = "Use direct transport, better stays, and reserved time for rest."
+        else:
+            style_line = "Mix public transport with one convenience upgrade if needed."
+            
+        base_action = base_plans[(i - 1) % len(base_plans)]
+        days_plan.append({
+            "title": f"Day {i}",
+            "text": f"{intro} {base_action} {style_line}"
+        })
+
+    day_cards_html = ""
+    for d in days_plan:
+        day_cards_html += f"""
+        <div class="day-card">
+            <span class="day-title">{d['title']}</span>
+            <span class="day-text">{d['text']}</span>
+        </div>
+        """
+    itinerary_html = f"""
+    <div class="glass-panel">
+        <div class="section-hdr">Day-wise Itinerary</div>
+        {day_cards_html}
+    </div>
+    """
+
+    # 6. Packing & Tips HTML
+    tips = [
+        f"Save offline maps and keep the {resolved['name']} hotel or hostel address pinned.",
+        "Carry student ID, one power bank, refillable water bottle, and emergency cash.",
+        "Check local transport closing times before planning late evening travel."
+    ]
+    if focus in ["Adventure", "Nature"]:
+        tips.append("Pack walking shoes, weather protection, and basic medicines.")
+    elif focus == "Food":
+        tips.append("Set a food budget cap for each day and shortlist clean, well-rated places.")
+    else:
+        tips.append("Start early to avoid crowds and reduce transport waiting time.")
+        
+    if group == "Solo":
+        tips.append("Share your live location or daily route summary with a trusted contact.")
+    else:
+        tips.append("Set one common meet-up point in case the group splits during the day.")
+        
+    if notes.strip():
+        truncated_notes = notes.strip()[:90] + ("..." if len(notes.strip()) > 90 else "")
+        tips.append(f"Planner note used: {truncated_notes}")
+
+    tips_li = "".join([f"<li style='margin-bottom: 6px;'>{t}</li>" for t in tips])
+    tips_html = f"""
+    <div class="glass-panel">
+        <div class="section-hdr">Packing & Safety</div>
+        <ul style="margin: 0; padding-left: 18px; color: #3b485e; font-size:0.92rem; line-height: 1.5;">
+            {tips_li}
+        </ul>
+    </div>
+    """
+
+    return snap_html, overview_html, map_box_html, budget_html, itinerary_html, tips_html
+
+
+# Building Gradio Interface
+with gr.Blocks(css=css, title="CampusTrail AI") as demo:
+    # Banner
+    gr.HTML("""
+    <div class="hero-banner">
+        <div class="eyebrow">Capstone Project • AI Travel Planner</div>
+        <h1 class="hero-title">CampusTrail AI</h1>
+        <p class="hero-desc">
+            A student-focused travel planner that builds a budget-friendly trip outline from destination,
+            budget, number of days, travel style, and interests. It creates a day-wise plan, cost split,
+            packing checklist, and practical tips in one screen.
+        </p>
+    </div>
+    """)
+
+    with gr.Row(equal_height=False):
+        # Left Panel (Inputs)
+        with gr.Column(scale=45):
+            gr.HTML('<div class="section-hdr">Plan a Trip</div>')
+            gr.Markdown("Fill the details or click a preset below. Enter starting location to draw the routing line.")
+            
+            # Preset Row
+            with gr.Row():
+                goa_btn = gr.Button("Weekend Goa", size="sm", elem_classes=["preset-btn"])
+                jaipur_btn = gr.Button("Budget Jaipur", size="sm", elem_classes=["preset-btn"])
+                manali_btn = gr.Button("Nature Manali", size="sm", elem_classes=["preset-btn"])
+
+            # Inputs Group
+            with gr.Group():
+                dest = gr.Textbox(label="Destination", placeholder="Jaipur, Goa, Manali", value="")
+                
+                with gr.Row():
+                    days = gr.Dropdown(label="Trip Duration", choices=[2, 3, 4, 5], value=3)
+                    budget = gr.Number(label="Budget (INR)", value=6000, minimum=1000, step=500)
+                
+                with gr.Row():
+                    group = gr.Dropdown(label="Travel Group", choices=["Solo", "Friends", "Couple", "Family"], value="Friends")
+                    style = gr.Dropdown(label="Travel Style", choices=["Budget", "Balanced", "Comfort"], value="Balanced")
+                    focus = gr.Dropdown(label="Trip Focus", choices=["Culture", "Adventure", "Food", "Nature", "Mixed"], value="Culture")
+                
+                notes = gr.Textbox(label="Preferences / Notes", placeholder="e.g. prefer trains, low-cost stays, local food...", lines=3)
+                
+                gr.HTML("<hr style='margin: 10px 0; opacity: 0.15;'/>")
+                start_loc = gr.Textbox(label="Your Starting Location (for Route planning)", placeholder="e.g. Mumbai, Delhi, Bangalore", value="")
+            
+            with gr.Row():
+                submit_btn = gr.Button("Generate Itinerary", variant="primary")
+                reset_btn = gr.Button("Reset Form")
+
+        # Right Panel (Outputs)
+        with gr.Column(scale=55):
+            gr.HTML('<div class="section-hdr">Generated Plan</div>')
+            
+            # Interactive HTML outputs
+            out_snap = gr.HTML()
+            out_overview = gr.HTML()
+            out_map = gr.HTML()
+            out_budget = gr.HTML()
+            out_itinerary = gr.HTML()
+            out_tips = gr.HTML()
+
+    # Preset Event Handler Bindings
+    def load_preset(name):
+        p = sample_trips[name]
+        return p["destination"], p["days"], p["budget"], p["group"], p["style"], p["focus"], p["notes"]
+
+    goa_btn.click(fn=lambda: load_preset("Goa"), outputs=[dest, days, budget, group, style, focus, notes])
+    jaipur_btn.click(fn=lambda: load_preset("Jaipur"), outputs=[dest, days, budget, group, style, focus, notes])
+    manali_btn.click(fn=lambda: load_preset("Manali"), outputs=[dest, days, budget, group, style, focus, notes])
+
+    # Submit Event Binding
+    submit_btn.click(
+        fn=generate_itinerary,
+        inputs=[dest, days, budget, group, style, focus, notes, start_loc],
+        outputs=[out_snap, out_overview, out_map, out_budget, out_itinerary, out_tips]
+    )
+
+    # Reset Event Binding
+    def clear_form():
+        return "", 3, 6000, "Friends", "Balanced", "Culture", "", ""
+
+    reset_btn.click(
+        fn=clear_form,
+        outputs=[dest, days, budget, group, style, focus, notes, start_loc]
+    ).then(
+        fn=generate_itinerary,
+        inputs=[dest, days, budget, group, style, focus, notes, start_loc],
+        outputs=[out_snap, out_overview, out_map, out_budget, out_itinerary, out_tips]
+    )
+
+    # Load initial default state on mount
+    demo.load(
+        fn=generate_itinerary,
+        inputs=[dest, days, budget, group, style, focus, notes, start_loc],
+        outputs=[out_snap, out_overview, out_map, out_budget, out_itinerary, out_tips]
+    )
+
+# Launch with share=True for public deployment link
+if __name__ == "__main__":
+    demo.launch(share=True)
