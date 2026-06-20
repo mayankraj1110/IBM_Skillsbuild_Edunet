@@ -3,27 +3,35 @@ import folium
 import requests
 import math
 
-# Custom CSS for glassmorphic styling, fonts, and grid layout in Gradio
+# Custom Gradio Theme for visual baseline
+theme = gr.themes.Soft(
+    primary_hue="blue",
+    secondary_hue="teal",
+    neutral_hue="slate",
+    font=[gr.themes.GoogleFont("Outfit"), "sans-serif"]
+).set(
+    body_background_fill="linear-gradient(135deg, #dff2ff 0%, #edf8ff 45%, #fdf7e9 100%)",
+    block_background_fill="rgba(255, 255, 255, 0.72)",
+    input_background_fill="#ffffff",
+    button_primary_background_fill="linear-gradient(120deg, #1272d9, #1d91cc)",
+    button_primary_text_color="#ffffff",
+    button_secondary_background_fill="rgba(255, 255, 255, 0.95)",
+    button_secondary_text_color="#172033",
+)
+
+# Custom CSS for micro-animations, presets, day cards, and typography
 css = """
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
 
-body, .gradio-container {
-    font-family: 'Outfit', sans-serif !important;
-    background: 
-        radial-gradient(circle at top left, rgba(18, 114, 217, 0.08), transparent 40%),
-        radial-gradient(circle at 85% 15%, rgba(240, 165, 58, 0.08), transparent 30%),
-        linear-gradient(140deg, #dff2ff 0%, #edf8ff 40%, #fdf7e9 100%) !important;
-    background-attachment: fixed !important;
-}
-
+/* Banner styling */
 .hero-banner {
     background: rgba(248, 251, 255, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.5);
     border-radius: 30px;
-    padding: 30px;
-    margin-bottom: 20px;
+    padding: 38px;
+    margin-bottom: 24px;
     backdrop-filter: blur(14px);
-    box-shadow: 0 20px 50px rgba(17, 44, 80, 0.06);
+    box-shadow: 0 25px 60px rgba(17, 44, 80, 0.08);
 }
 
 .eyebrow {
@@ -32,103 +40,108 @@ body, .gradio-container {
     gap: 8px;
     border-radius: 999px;
     padding: 6px 14px;
-    background: rgba(18, 114, 217, 0.1);
+    background: rgba(18, 114, 217, 0.10);
     color: #1272d9;
     font-size: 0.8rem;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .hero-title {
-    font-size: clamp(2rem, 3.5vw, 3.5rem);
+    font-size: clamp(2.2rem, 3.8vw, 3.8rem);
     font-weight: 800;
     line-height: 0.95;
     letter-spacing: -0.04em;
-    margin: 0 0 10px 0;
+    margin: 0 0 12px 0;
     color: #172033;
 }
 
 .hero-desc {
     color: #61708a;
-    font-size: 1.02rem;
-    line-height: 1.6;
+    font-size: 1.06rem;
+    line-height: 1.65;
     margin: 0;
     max-width: 800px;
 }
 
-/* Glassmorphic output styling */
-.glass-panel {
-    background: rgba(255, 255, 255, 0.72) !important;
+/* Force rounded corners on all Gradio blocks, cards, and panels */
+.gradio-container .block {
+    border-radius: 22px !important;
     border: 1px solid rgba(23, 32, 51, 0.12) !important;
-    border-radius: 24px !important;
+    box-shadow: 0 15px 35px rgba(17, 44, 80, 0.04) !important;
+}
+
+/* Style input fields */
+.gradio-container input, .gradio-container select, .gradio-container textarea {
+    border-radius: 12px !important;
+    border: 1px solid rgba(23, 32, 51, 0.12) !important;
+    background-color: #ffffff !important;
+    font-size: 0.95rem !important;
+}
+
+/* Force round buttons */
+.gradio-container button {
+    border-radius: 999px !important;
+}
+
+/* Custom form container override to prevent dark boxes */
+.form-container {
+    background: rgba(255, 255, 255, 0.45) !important;
+    border: 1px solid rgba(23, 32, 51, 0.08) !important;
+    border-radius: 20px !important;
     padding: 20px !important;
-    backdrop-filter: blur(12px) !important;
-    box-shadow: 0 10px 30px rgba(17, 44, 80, 0.04) !important;
-    margin-bottom: 16px !important;
 }
 
-.section-hdr {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #172033;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 12px;
-    border-bottom: 1px solid rgba(23, 32, 51, 0.08);
-    padding-bottom: 6px;
+/* Styled instructions */
+.helper-text {
+    color: #51607a !important;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    margin-bottom: 14px;
 }
 
-/* Metric grids */
-.metric-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin-top: 10px;
+/* Preset buttons as clean, animated pills */
+.preset-btn {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 1px solid rgba(18, 114, 217, 0.22) !important;
+    color: #1272d9 !important;
+    font-weight: 600 !important;
+    font-size: 0.88rem !important;
+    border-radius: 999px !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 2px 4px rgba(18, 114, 217, 0.02) !important;
 }
 
-.budget-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-    margin-top: 10px;
+.preset-btn:hover {
+    background: rgba(18, 114, 217, 0.08) !important;
+    border-color: #1272d9 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 14px rgba(18, 114, 217, 0.08) !important;
 }
 
-.metric-card {
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(23, 32, 51, 0.08);
-    border-radius: 14px;
-    padding: 10px;
-    text-align: center;
+.preset-btn:active {
+    transform: translateY(0px) !important;
 }
 
-.metric-label {
-    font-size: 0.75rem;
-    color: #61708a;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    display: block;
-    margin-bottom: 2px;
-}
-
-.metric-val {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: #172033;
-}
-
-/* Day Cards */
+/* Day Itinerary Cards */
 .day-card {
-    background: linear-gradient(135deg, rgba(18, 114, 217, 0.05), rgba(13, 139, 128, 0.04));
+    background: linear-gradient(135deg, rgba(18, 114, 217, 0.04), rgba(13, 139, 128, 0.03));
     border: 1px solid rgba(18, 114, 217, 0.08);
-    border-radius: 14px;
-    padding: 14px;
-    margin-bottom: 10px;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: all 0.2s ease;
+}
+
+.day-card:hover {
+    border-color: rgba(18, 114, 217, 0.18);
+    transform: translateX(2px);
 }
 
 .day-title {
-    font-size: 0.95rem;
+    font-size: 0.98rem;
     font-weight: 700;
     color: #1272d9;
     margin-bottom: 4px;
@@ -136,18 +149,90 @@ body, .gradio-container {
 }
 
 .day-text {
-    font-size: 0.9rem;
+    font-size: 0.92rem;
     color: #3b485e;
-    line-height: 1.5;
+    line-height: 1.6;
 }
 
-/* General Layout helpers */
+/* Glass panel wrappers for output blocks */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.72) !important;
+    border: 1px solid rgba(23, 32, 51, 0.12) !important;
+    border-radius: 24px !important;
+    padding: 22px !important;
+    backdrop-filter: blur(12px) !important;
+    box-shadow: 0 10px 30px rgba(17, 44, 80, 0.03) !important;
+    margin-bottom: 20px !important;
+}
+
+.section-hdr {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #172033;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 14px;
+    border-bottom: 1px solid rgba(23, 32, 51, 0.08);
+    padding-bottom: 8px;
+}
+
+/* Metric configurations */
+.metric-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.budget-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.metric-card {
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(23, 32, 51, 0.08);
+    border-radius: 16px;
+    padding: 12px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.01);
+}
+
+.metric-label {
+    font-size: 0.78rem;
+    color: #61708a;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.metric-val {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #172033;
+}
+
+/* Badge styling */
 .badge {
     background: rgba(13, 139, 128, 0.12);
     color: #0d8b80;
     font-weight: 700;
-    font-size: 0.8rem;
-    padding: 4px 10px;
+    font-size: 0.82rem;
+    padding: 6px 14px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.badge-inactive {
+    background: rgba(97, 112, 138, 0.12);
+    color: #61708a;
+    font-weight: 700;
+    font-size: 0.82rem;
+    padding: 6px 14px;
     border-radius: 999px;
 }
 """
@@ -304,7 +389,7 @@ def find_local_dest(query):
 def geocode_dest(query):
     try:
         url = f"https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q={requests.utils.quote(query)}"
-        headers = {"User-Agent": "CampusTrailAI-Gradio/1.0"}
+        headers = {"User-Agent": "CampusTrailAI-Gradio/2.0"}
         res = requests.get(url, headers=headers, timeout=5)
         if res.ok and res.json():
             return res.json()[0]
@@ -350,7 +435,7 @@ def generate_itinerary(dest, days, budget, group, style, focus, notes, start_loc
         <div class="glass-panel">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h4 style="margin:0; font-size: 1.05rem; font-weight:700;">Trip Snapshot</h4>
-                <span class="badge">No Plan Loaded</span>
+                <span class="badge-inactive">No Plan Loaded</span>
             </div>
             <div class="metric-row">
                 <div class="metric-card"><span class="metric-label">Budget Band</span><span class="metric-val">-</span></div>
@@ -367,7 +452,7 @@ def generate_itinerary(dest, days, budget, group, style, focus, notes, start_loc
         """
         # Create empty map
         m = folium.Map(location=[22.9734, 78.6569], zoom_start=5, tiles="OpenStreetMap")
-        map_html = m._repr_html_()
+        map_html = f"<div style='border-radius:16px; overflow:hidden; border:1px solid rgba(23,32,51,0.1);'>{m._repr_html_()}</div>"
         return empty_snap, empty_overview, map_html, "", "", ""
 
     resolved = resolve_dest(dest)
@@ -387,7 +472,8 @@ def generate_itinerary(dest, days, budget, group, style, focus, notes, start_loc
         </div>
         """
         m = folium.Map(location=[22.9734, 78.6569], zoom_start=5)
-        return error_snap, error_overview, m._repr_html_(), "", "", ""
+        map_html = f"<div style='border-radius:16px; overflow:hidden; border:1px solid rgba(23,32,51,0.1);'>{m._repr_html_()}</div>"
+        return error_snap, error_overview, map_html, "", "", ""
 
     # Geocode starting location if provided
     start_coords = None
@@ -483,19 +569,19 @@ def generate_itinerary(dest, days, budget, group, style, focus, notes, start_loc
     
     highlights_html = ""
     if resolved["highlights"]:
-        highlights_html = "<div style='margin-top:10px; font-size:0.88rem;'><b>Local Highlights:</b><ul>"
+        highlights_html = "<div style='margin-top:12px; font-size:0.9rem;'><b>Local Highlights:</b><ul>"
         for h in resolved["highlights"]:
-            highlights_html += f"<li><b>{h['name']}</b>: {h['blurb']}</li>"
+            highlights_html += f"<li style='margin-bottom:4px;'><b>{h['name']}</b>: {h['blurb']}</li>"
         highlights_html += "</ul></div>"
     
     map_box_html = f"""
     <div class="glass-panel">
         <div class="section-hdr">Map & Location Insights</div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.88rem; margin-bottom:10px;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.88rem; margin-bottom:12px;">
             <div><b>Coordinates:</b> {resolved['center'][0]:.4f}, {resolved['center'][1]:.4f}<br><b>Best Base:</b> {resolved['base']}</div>
             <div><b>Transport:</b> {resolved['transport']}<br><b>Best Season:</b> {resolved['season']}</div>
         </div>
-        <div style="border-radius:14px; overflow:hidden; border: 1px solid rgba(23,32,51,0.1);">{m._repr_html_()}</div>
+        <div style="border-radius:16px; overflow:hidden; border:1px solid rgba(23,32,51,0.1);">{m._repr_html_()}</div>
         <p style="color: #61708a; font-size: 0.8rem; margin: 8px 0 0 0;">{map_status}</p>
         {highlights_html}
     </div>
@@ -602,8 +688,8 @@ def generate_itinerary(dest, days, budget, group, style, focus, notes, start_loc
     return snap_html, overview_html, map_box_html, budget_html, itinerary_html, tips_html
 
 
-# Building Gradio Interface
-with gr.Blocks(css=css, title="CampusTrail AI") as demo:
+# Building Gradio Blocks Interface
+with gr.Blocks(theme=theme, css=css, title="CampusTrail AI") as demo:
     # Banner
     gr.HTML("""
     <div class="hero-banner">
@@ -621,7 +707,7 @@ with gr.Blocks(css=css, title="CampusTrail AI") as demo:
         # Left Panel (Inputs)
         with gr.Column(scale=45):
             gr.HTML('<div class="section-hdr">Plan a Trip</div>')
-            gr.Markdown("Fill the details or click a preset below. Enter starting location to draw the routing line.")
+            gr.HTML('<p class="helper-text">Fill the details below or click a preset to auto-fill. Enter starting location to draw the routing line.</p>')
             
             # Preset Row
             with gr.Row():
@@ -629,8 +715,8 @@ with gr.Blocks(css=css, title="CampusTrail AI") as demo:
                 jaipur_btn = gr.Button("Budget Jaipur", size="sm", elem_classes=["preset-btn"])
                 manali_btn = gr.Button("Nature Manali", size="sm", elem_classes=["preset-btn"])
 
-            # Inputs Group
-            with gr.Group():
+            # Inputs Group inside form container
+            with gr.Group(elem_classes=["form-container"]):
                 dest = gr.Textbox(label="Destination", placeholder="Jaipur, Goa, Manali", value="")
                 
                 with gr.Row():
@@ -644,7 +730,7 @@ with gr.Blocks(css=css, title="CampusTrail AI") as demo:
                 
                 notes = gr.Textbox(label="Preferences / Notes", placeholder="e.g. prefer trains, low-cost stays, local food...", lines=3)
                 
-                gr.HTML("<hr style='margin: 10px 0; opacity: 0.15;'/>")
+                gr.HTML("<hr style='margin: 15px 0; opacity: 0.15;'/>")
                 start_loc = gr.Textbox(label="Your Starting Location (for Route planning)", placeholder="e.g. Mumbai, Delhi, Bangalore", value="")
             
             with gr.Row():
