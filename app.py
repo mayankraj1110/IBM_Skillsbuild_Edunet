@@ -543,58 +543,45 @@ with col_right:
     
     if not resolved_dest:
         # Placeholder snapshot & card
-        st.markdown(f"""
-        <div class="glass-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <h4 style="margin:0; font-size: 1.1rem; font-weight: 800; color: #172033; text-transform: uppercase; letter-spacing: 0.05em;">Trip Snapshot</h4>
-                <span class="badge-inactive">No Plan Loaded</span>
-            </div>
-            <div style="padding: 12px; background: rgba(255,255,255,0.6); border-radius: 14px; border: 1px solid rgba(23,32,51,0.06);">
-                <span style="color: #61708a; display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Planner Summary</span>
-                <strong style="color: #172033; font-size: 0.95rem;">Ready to build a student trip. Enter destination to begin.</strong>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        placeholder_html = '<div class="glass-card">'
+        placeholder_html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">'
+        placeholder_html += '<h4 style="margin:0; font-size: 1.1rem; font-weight: 800; color: #172033; text-transform: uppercase; letter-spacing: 0.05em;">Trip Snapshot</h4>'
+        placeholder_html += '<span class="badge-inactive">No Plan Loaded</span>'
+        placeholder_html += '</div>'
+        placeholder_html += '<div style="padding: 12px; background: rgba(255,255,255,0.6); border-radius: 14px; border: 1px solid rgba(23,32,51,0.06);">'
+        placeholder_html += '<span style="color: #61708a; display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Planner Summary</span>'
+        placeholder_html += '<strong style="color: #172033; font-size: 0.95rem;">Ready to build a student trip. Enter destination to begin.</strong>'
+        placeholder_html += '</div>'
+        placeholder_html += '</div>'
+        
+        st.markdown(placeholder_html, unsafe_allow_html=True)
         st.info("👈 Enter a destination in the form on the left to generate the complete student itinerary and load the interactive map.")
     else:
         # 1. Snapshot Card
         badge_style = f"{resolved_dest['name']} • {st.session_state['form_style']}"
         summary_val = f"{resolved_dest['name']} {st.session_state['form_focus'].lower()} trip for {st.session_state['form_group'].lower()} travelers."
-        st.markdown(f"""
-        <div class="glass-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <h4 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #172033; text-transform: uppercase; letter-spacing: 0.05em;">Trip Snapshot</h4>
-                <span class="badge">{badge_style}</span>
-            </div>
-            <div style="padding: 12px; background: rgba(255,255,255,0.6); border-radius: 14px; border: 1px solid rgba(23,32,51,0.06); margin-bottom: 14px;">
-                <span style="color: #61708a; display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Planner Summary</span>
-                <strong style="color: #172033; font-size: 0.95rem;">{summary_val}</strong>
-            </div>
-            <div class="metric-row">
-                <div class="metric-card">
-                    <span class="metric-label">Budget Band</span>
-                    <span class="metric-value">{get_budget_band(st.session_state["form_budget"])}</span>
-                </div>
-                <div class="metric-card">
-                    <span class="metric-label">Style</span>
-                    <span class="metric-value">{st.session_state["form_style"]}</span>
-                </div>
-                <div class="metric-card">
-                    <span class="metric-label">Duration</span>
-                    <span class="metric-value">{st.session_state["form_days"]} Days</span>
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        
+        snapshot_html = '<div class="glass-card">'
+        snapshot_html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">'
+        snapshot_html += '<h4 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #172033; text-transform: uppercase; letter-spacing: 0.05em;">Trip Snapshot</h4>'
+        snapshot_html += f'<span class="badge">{badge_style}</span>'
+        snapshot_html += '</div>'
+        snapshot_html += '<div style="padding: 12px; background: rgba(255,255,255,0.6); border-radius: 14px; border: 1px solid rgba(23,32,51,0.06); margin-bottom: 14px;">'
+        snapshot_html += '<span style="color: #61708a; display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Planner Summary</span>'
+        snapshot_html += f'<strong style="color: #172033; font-size: 0.95rem;">{summary_val}</strong>'
+        snapshot_html += '</div>'
+        snapshot_html += '<div class="metric-row">'
+        snapshot_html += f'<div class="metric-card"><span class="metric-label">Budget Band</span><span class="metric-value">{get_budget_band(st.session_state["form_budget"])}</span></div>'
+        snapshot_html += f'<div class="metric-card"><span class="metric-label">Style</span><span class="metric-value">{st.session_state["form_style"]}</span></div>'
+        snapshot_html += f'<div class="metric-card"><span class="metric-label">Duration</span><span class="metric-value">{st.session_state["form_days"]} Days</span></div>'
+        snapshot_html += '</div>'
+        snapshot_html += '</div>'
+        
+        st.markdown(snapshot_html, unsafe_allow_html=True)
         
         # 2. Overview Card
         overview_msg = f"CampusTrail suggests a <strong>{st.session_state['form_days']}-day {st.session_state['form_focus'].lower()} trip</strong> to <strong>{resolved_dest['name']}</strong> for a <strong>{st.session_state['form_group'].lower()}</strong> group with a budget of <strong>Rs {st.session_state['form_budget']:,}</strong>. The plan aims to keep travel practical, affordable, and student-friendly."
-        st.markdown(f"""
-        <div class="glass-card">
-            <h4 style="margin: 0 0 12px 0; font-size: 1.1rem; font-weight: 800; color: #172033; text-transform: uppercase; letter-spacing: 0.05em;">Trip Overview</h4>
-            <p style="margin: 0; color: #3b485e; font-size: 0.98rem; line-height: 1.7; font-weight: 400;">{overview_msg}</p>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(f'<div class="glass-card"><h4 style="margin: 0 0 12px 0; font-size: 1.1rem; font-weight: 800; color: #172033; text-transform: uppercase; letter-spacing: 0.05em;">Trip Overview</h4><p style="margin: 0; color: #3b485e; font-size: 0.98rem; line-height: 1.7; font-weight: 400;">{overview_msg}</p></div>', unsafe_allow_html=True)
         
         # 3. Map & Location Card
         coords_str = f"{resolved_dest['center'][0]:.4f}, {resolved_dest['center'][1]:.4f}"
@@ -658,37 +645,26 @@ with col_right:
                 highlights_li += f"<li style='margin-bottom: 6px;'><b>{h['name']}</b>: {h['blurb']}</li>"
             highlights_li += "</ul></div>"
             
-        st.markdown(f"""
-        <div class="glass-card">
-            <h4 style="margin: 0 0 14px 0; font-size: 1.1rem; font-weight: 800; color: #172033; text-transform: uppercase; letter-spacing: 0.05em;">Map & Location Insights</h4>
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 0.88rem; margin-bottom: 14px; padding: 12px; background: rgba(255,255,255,0.5); border-radius: 12px; border: 1px solid rgba(23,32,51,0.04);">
-                <div>
-                    <span style="color:#61708a; display:block; font-size:0.72rem; text-transform:uppercase; font-weight:600; margin-bottom:2px;">Coordinates</span>
-                    <strong style="color:#172033; font-size:0.9rem;">{coords_str}</strong>
-                </div>
-                <div>
-                    <span style="color:#61708a; display:block; font-size:0.72rem; text-transform:uppercase; font-weight:600; margin-bottom:2px;">Best Base</span>
-                    <strong style="color:#172033; font-size:0.9rem;">{resolved_dest['base']}</strong>
-                </div>
-                <div style="margin-top: 8px;">
-                    <span style="color:#61708a; display:block; font-size:0.72rem; text-transform:uppercase; font-weight:600; margin-bottom:2px;">Transport</span>
-                    <strong style="color:#172033; font-size:0.9rem;">{resolved_dest['transport']}</strong>
-                </div>
-                <div style="margin-top: 8px;">
-                    <span style="color:#61708a; display:block; font-size:0.72rem; text-transform:uppercase; font-weight:600; margin-bottom:2px;">Best Season</span>
-                    <strong style="color:#172033; font-size:0.9rem;">{resolved_dest['season']}</strong>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
+        # We start the card block in raw HTML
+        map_header_html = '<div class="glass-card">'
+        map_header_html += '<h4 style="margin: 0 0 14px 0; font-size: 1.1rem; font-weight: 800; color: #172033; text-transform: uppercase; letter-spacing: 0.05em;">Map & Location Insights</h4>'
+        map_header_html += '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 0.88rem; margin-bottom: 14px; padding: 12px; background: rgba(255,255,255,0.5); border-radius: 12px; border: 1px solid rgba(23,32,51,0.04);">'
+        map_header_html += f'<div><span style="color:#61708a; display:block; font-size:0.72rem; text-transform:uppercase; font-weight:600; margin-bottom:2px;">Coordinates</span><strong style="color:#172033; font-size:0.9rem;">{coords_str}</strong></div>'
+        map_header_html += f'<div><span style="color:#61708a; display:block; font-size:0.72rem; text-transform:uppercase; font-weight:600; margin-bottom:2px;">Best Base</span><strong style="color:#172033; font-size:0.9rem;">{resolved_dest["base"]}</strong></div>'
+        map_header_html += f'<div style="margin-top: 8px;"><span style="color:#61708a; display:block; font-size:0.72rem; text-transform:uppercase; font-weight:600; margin-bottom:2px;">Transport</span><strong style="color:#172033; font-size:0.9rem;">{resolved_dest["transport"]}</strong></div>'
+        map_header_html += f'<div style="margin-top: 8px;"><span style="color:#61708a; display:block; font-size:0.72rem; text-transform:uppercase; font-weight:600; margin-bottom:2px;">Best Season</span><strong style="color:#172033; font-size:0.9rem;">{resolved_dest["season"]}</strong></div>'
+        map_header_html += '</div>'
+        
+        st.markdown(map_header_html, unsafe_allow_html=True)
         
         # Render map natively in Streamlit-Folium inside the card block
         st_folium(m, width=650, height=350, returned_objects=[])
         
-        st.markdown(f"""
-            <p style="color: #61708a; font-size: 0.8rem; margin: 10px 0 0 0; font-weight: 500;">{map_status_str}</p>
-            {highlights_li}
-        </div>
-        """, unsafe_allow_html=True)
+        map_footer_html = f'<p style="color: #61708a; font-size: 0.8rem; margin: 10px 0 0 0; font-weight: 500;">{map_status_str}</p>'
+        map_footer_html += f'{highlights_li}'
+        map_footer_html += '</div>'
+        
+        st.markdown(map_footer_html, unsafe_allow_html=True)
         
         # 4. Budget Split Card (Premium grid style with progress)
         costs = build_budget_split(st.session_state["form_budget"], st.session_state["form_style"])
@@ -707,27 +683,18 @@ with col_right:
         
         cost_cards_html = ""
         for name, amount, pct, icon, bg, color in items:
-            cost_cards_html += f"""
-            <div style="background: #ffffff; border: 1px solid rgba(23,32,51,0.08); border-radius: 16px; padding: 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.01);">
-                <div style="width: 42px; height: 42px; border-radius: 12px; background: {bg}; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">{icon}</div>
-                <div style="flex-grow: 1;">
-                    <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                        <span style="font-size: 0.75rem; color: #61708a; text-transform: uppercase; letter-spacing: 0.05em; font-weight:600;">{name}</span>
-                        <span style="font-size: 0.7rem; color: {color}; font-weight: 700; background: {bg}; padding: 2px 6px; border-radius: 6px;">{pct}%</span>
-                    </div>
-                    <strong style="font-size: 1.1rem; color: #172033; display: block; margin-top: 2px;">Rs {int(amount):,}</strong>
-                </div>
-            </div>
-            """
+            cost_cards_html += f'<div style="background: #ffffff; border: 1px solid rgba(23,32,51,0.08); border-radius: 16px; padding: 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.01);">'
+            cost_cards_html += f'<div style="width: 42px; height: 42px; border-radius: 12px; background: {bg}; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">{icon}</div>'
+            cost_cards_html += f'<div style="flex-grow: 1;">'
+            cost_cards_html += f'<div style="display: flex; justify-content: space-between; align-items: baseline;">'
+            cost_cards_html += f'<span style="font-size: 0.75rem; color: #61708a; text-transform: uppercase; letter-spacing: 0.05em; font-weight:600;">{name}</span>'
+            cost_cards_html += f'<span style="font-size: 0.7rem; color: {color}; font-weight: 700; background: {bg}; padding: 2px 6px; border-radius: 6px;">{pct}%</span>'
+            cost_cards_html += f'</div>'
+            cost_cards_html += f'<strong style="font-size: 1.1rem; color: #172033; display: block; margin-top: 2px;">Rs {int(amount):,}</strong>'
+            cost_cards_html += f'</div>'
+            cost_cards_html += f'</div>'
             
-        st.markdown(f"""
-        <div class="glass-card">
-            <h4 style="margin:0 0 14px 0; font-size: 1.1rem; font-weight: 800; color: #172033; text-transform: uppercase; letter-spacing: 0.05em;">Budget Split ({st.session_state['form_style']} Style)</h4>
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
-                {cost_cards_html}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(f'<div class="glass-card"><h4 style="margin:0 0 14px 0; font-size: 1.1rem; font-weight: 800; color: #172033; text-transform: uppercase; letter-spacing: 0.05em;">Budget Split ({st.session_state["form_style"]} Style)</h4><div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">{cost_cards_html}</div></div>', unsafe_allow_html=True)
         
         # 5. Day-wise Itinerary Card (Vertical timeline)
         days_plan = []
@@ -756,25 +723,15 @@ with col_right:
             
         timeline_items_html = ""
         for d in days_plan:
-            timeline_items_html += f"""
-            <div style="position: relative; margin-bottom: 24px; padding-left: 24px;">
-                <!-- Circle Node -->
-                <div style="position: absolute; left: -31px; top: 3px; width: 12px; height: 12px; border-radius: 50%; background: #1272d9; border: 4px solid #ffffff; box-shadow: 0 0 0 3px rgba(18, 114, 217, 0.15);"></div>
-                <div>
-                    <strong style="font-size: 1rem; color: #1272d9; display: block; margin-bottom: 4px; font-weight: 700; text-transform: uppercase; letter-spacing:0.03em;">Day {d['day']}</strong>
-                    <p style="margin: 0; font-size: 0.94rem; color: #3b485e; line-height: 1.6;">{d['text']}</p>
-                </div>
-            </div>
-            """
+            timeline_items_html += f'<div style="position: relative; margin-bottom: 24px; padding-left: 24px;">'
+            timeline_items_html += f'<div style="position: absolute; left: -31px; top: 3px; width: 12px; height: 12px; border-radius: 50%; background: #1272d9; border: 4px solid #ffffff; box-shadow: 0 0 0 3px rgba(18, 114, 217, 0.15);"></div>'
+            timeline_items_html += f'<div>'
+            timeline_items_html += f'<strong style="font-size: 1rem; color: #1272d9; display: block; margin-bottom: 4px; font-weight: 700; text-transform: uppercase; letter-spacing:0.03em;">Day {d["day"]}</strong>'
+            timeline_items_html += f'<p style="margin: 0; font-size: 0.94rem; color: #3b485e; line-height: 1.6;">{d["text"]}</p>'
+            timeline_items_html += f'</div>'
+            timeline_items_html += f'</div>'
             
-        st.markdown(f"""
-        <div class="glass-card">
-            <h4 style="margin:0 0 14px 0; font-size: 1.1rem; font-weight: 800; color: #172033; text-transform: uppercase; letter-spacing: 0.05em;">Day-wise Timeline</h4>
-            <div style="position: relative; border-left: 2px solid rgba(18, 114, 217, 0.15); margin-left: 31px; margin-top: 14px; padding-bottom: 1px;">
-                {timeline_items_html}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(f'<div class="glass-card"><h4 style="margin:0 0 14px 0; font-size: 1.1rem; font-weight: 800; color: #172033; text-transform: uppercase; letter-spacing: 0.05em;">Day-wise Timeline</h4><div style="position: relative; border-left: 2px solid rgba(18, 114, 217, 0.15); margin-left: 31px; margin-top: 14px; padding-bottom: 1px;">{timeline_items_html}</div></div>', unsafe_allow_html=True)
         
         # 6. Packing & Safety Card (Checklist style)
         tips_list = [
@@ -800,21 +757,12 @@ with col_right:
             
         checklist_items_html = ""
         for t in tips_list:
-            checklist_items_html += f"""
-            <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
-                <div style="color: #0d8b80; font-weight: bold; font-size: 1.1rem; line-height: 1;">✓</div>
-                <span style="font-size: 0.94rem; color: #3b485e; line-height: 1.5;">{t}</span>
-            </div>
-            """
+            checklist_items_html += f'<div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px;">'
+            checklist_items_html += f'<div style="color: #0d8b80; font-weight: bold; font-size: 1.1rem; line-height: 1;">✓</div>'
+            checklist_items_html += f'<span style="font-size: 0.94rem; color: #3b485e; line-height: 1.5;">{t}</span>'
+            checklist_items_html += f'</div>'
             
-        st.markdown(f"""
-        <div class="glass-card">
-            <h4 style="margin:0 0 14px 0; font-size: 1.1rem; font-weight: 800; color: #172033; text-transform: uppercase; letter-spacing: 0.05em;">Packing & Safety Tips</h4>
-            <div style="margin-top: 10px;">
-                {checklist_items_html}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(f'<div class="glass-card"><h4 style="margin:0 0 14px 0; font-size: 1.1rem; font-weight: 800; color: #172033; text-transform: uppercase; letter-spacing: 0.05em;">Packing & Safety Tips</h4><div style="margin-top: 10px;">{checklist_items_html}</div></div>', unsafe_allow_html=True)
 
 st.markdown("""
 <div style="text-align: center; color: #61708a; font-size: 0.85rem; padding: 20px 0;">
