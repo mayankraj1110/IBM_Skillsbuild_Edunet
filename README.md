@@ -4,11 +4,8 @@ CampusTrail AI is a modern, student-focused travel planner designed to build bud
 
 ---
 
-## 🔗 Live Demo Links
-
-Access the fully functional live application instantly over the web:
-- **Primary Server Link**: [https://fad2c963711fd8.lhr.life](https://fad2c963711fd8.lhr.life) (Powered by `localhost.run`)
-- **Secondary Backup Link**: [https://dry-doodles-decide.loca.lt](https://dry-doodles-decide.loca.lt) (Powered by `localtunnel`)
+## 🔗 Live Demo Link
+https://ibmskillsbuildedunet-lmfjfs4b5whvhgmv4boizh.streamlit.app/
 
 ---
 
